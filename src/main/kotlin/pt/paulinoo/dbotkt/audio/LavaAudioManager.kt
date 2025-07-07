@@ -177,7 +177,10 @@ class LavaAudioManager : AudioCommandManager {
         logger.info("Skipped current track in guild ${guild.name}")
     }
 
-    override fun skipTo(guild: Guild, trackNumber: Int) {
+    override fun skipTo(
+        guild: Guild,
+        trackNumber: Int,
+    ) {
         val player = getOrCreatePlayer(guild)
         val queue = queues[guild.idLong] ?: return
 
@@ -191,13 +194,20 @@ class LavaAudioManager : AudioCommandManager {
         logger.info("Skipped to track number $trackNumber in guild ${guild.name}")
     }
 
-    override fun setVolume(guild: Guild, volume: Int) {
+    override fun setVolume(
+        guild: Guild,
+        volume: Int,
+    ) {
         val player = getOrCreatePlayer(guild)
         player.volume = volume
         logger.info("Set volume to $volume in guild ${guild.name}")
     }
 
-    override fun swap(guild: Guild, first: Int, second: Int) {
+    override fun swap(
+        guild: Guild,
+        first: Int,
+        second: Int,
+    ) {
         val queue = queues[guild.idLong] ?: return
 
         if (first < 0 || second < 0 || first >= queue.size || second >= queue.size) {
@@ -214,7 +224,10 @@ class LavaAudioManager : AudioCommandManager {
         logger.info("Swapped tracks at indices $first and $second in guild ${guild.name}")
     }
 
-    override fun remove(guild: Guild, trackNumber: Int) {
+    override fun remove(
+        guild: Guild,
+        trackNumber: Int,
+    ) {
         val queue = queues[guild.idLong] ?: return
 
         if (trackNumber < 0 || trackNumber >= queue.size) {
@@ -263,11 +276,11 @@ class LavaAudioManager : AudioCommandManager {
         val maxMemory = memory.maxMemory() / (1024 * 1024)
 
         return """
-        **Lavaplayer Stats:**
-        - Total players: $totalPlayers
-        - Playing: $playingPlayers
-        - Paused: $pausedPlayers
-        - Memory usage: $usedMemory MB / $maxMemory MB
-    """.trimIndent()
+            **Lavaplayer Stats:**
+            - Total players: $totalPlayers
+            - Playing: $playingPlayers
+            - Paused: $pausedPlayers
+            - Memory usage: $usedMemory MB / $maxMemory MB
+            """.trimIndent()
     }
 }

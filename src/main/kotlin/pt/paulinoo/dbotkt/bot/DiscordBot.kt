@@ -54,7 +54,5 @@ class DiscordBot() : CoroutineScope {
 
             job.cancel()
         }
-
     }
 }
-

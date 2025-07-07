@@ -5,13 +5,13 @@ import pt.paulinoo.dbotkt.audio.AudioCommandManager
 import pt.paulinoo.dbotkt.command.Command
 
 class ResumeCommand(
-    private val audioCommandManager: AudioCommandManager
-): Command {
+    private val audioCommandManager: AudioCommandManager,
+) : Command {
     override val name: String = "resume"
 
     override suspend fun execute(
         event: MessageReceivedEvent,
-        args: List<String>
+        args: List<String>,
     ) {
         val guild = event.guild
         val audioManager = guild.audioManager

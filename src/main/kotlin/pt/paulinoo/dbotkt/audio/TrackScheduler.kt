@@ -25,6 +25,5 @@ class TrackScheduler(
 
     override fun onEvent(event: AudioEvent?) {
         super.onEvent(event)
-
     }
 }

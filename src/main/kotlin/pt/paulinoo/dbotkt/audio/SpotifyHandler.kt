@@ -51,20 +51,11 @@ class SpotifyHandler(clientId: String, clientSecret: String) {
         return match?.groups?.get(1)?.value
     }
 
-    /*
     fun getPlaylistMetadata(playlistId: String): List<String> {
         val playlistRequest: GetPlaylistRequest = spotifyApi.getPlaylist(playlistId).build()
         val playlist = playlistRequest.execute()
         return playlist.tracks.items.map {
             getTrackMetadata(it.track.id)
         }
-    }
-     */
-
-    fun getPlaylistMetadata(playlistId: String): String {
-        ensureTokenValid()
-        val playlistRequest: GetPlaylistRequest = spotifyApi.getPlaylist(playlistId).build()
-        val playlist = playlistRequest.execute()
-        return playlist.id
     }
 }

@@ -5,13 +5,13 @@ import pt.paulinoo.dbotkt.audio.AudioCommandManager
 import pt.paulinoo.dbotkt.command.Command
 
 class RemoveCommand(
-    private val audioCommandManager: AudioCommandManager
-): Command{
+    private val audioCommandManager: AudioCommandManager,
+) : Command {
     override val name: String = "remove"
 
     override suspend fun execute(
         event: MessageReceivedEvent,
-        args: List<String>
+        args: List<String>,
     ) {
         if (args.isEmpty()) {
             event.channel.sendMessage("Please provide a song index to remove.").queue()

@@ -9,6 +9,6 @@ fun main() {
         Thread {
             println("Shutting down...")
             bot.shutdown()
-        }
+        },
     )
 }

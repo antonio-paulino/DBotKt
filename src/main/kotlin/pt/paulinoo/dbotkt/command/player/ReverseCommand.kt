@@ -5,13 +5,13 @@ import pt.paulinoo.dbotkt.audio.AudioCommandManager
 import pt.paulinoo.dbotkt.command.Command
 
 class ReverseCommand(
-    private val audioCommandManager: AudioCommandManager
-): Command {
+    private val audioCommandManager: AudioCommandManager,
+) : Command {
     override val name: String = "reverse"
 
     override suspend fun execute(
         event: MessageReceivedEvent,
-        args: List<String>
+        args: List<String>,
     ) {
         val guild = event.guild
         audioCommandManager.reverse(guild)

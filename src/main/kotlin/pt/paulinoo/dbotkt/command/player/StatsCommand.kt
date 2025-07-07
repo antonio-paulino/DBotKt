@@ -6,10 +6,13 @@ import pt.paulinoo.dbotkt.command.Command
 
 class StatsCommand(
     private val audioCommandManager: AudioCommandManager,
-): Command {
+) : Command {
     override val name: String = "stats"
 
-    override suspend fun execute(event: MessageReceivedEvent, args: List<String>) {
+    override suspend fun execute(
+        event: MessageReceivedEvent,
+        args: List<String>,
+    ) {
         val usageMessage = audioCommandManager.getLavaPlayerStats()
         event.channel.sendMessage(usageMessage).queue()
     }
