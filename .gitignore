@@ -46,3 +46,6 @@ bin/
 
 ### env ###
 .env
+
+### Jar ###
+*.jar
