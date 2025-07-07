@@ -176,4 +176,98 @@ class LavaAudioManager : AudioCommandManager {
         getOrCreatePlayer(guild).playTrack(null)
         logger.info("Skipped current track in guild ${guild.name}")
     }
+
+    override fun skipTo(guild: Guild, trackNumber: Int) {
+        val player = getOrCreatePlayer(guild)
+        val queue = queues[guild.idLong] ?: return
+
+        if (trackNumber < 0 || trackNumber >= queue.size) {
+            logger.warn("Invalid track number: $trackNumber in guild ${guild.name}")
+            return
+        }
+
+        val trackToSkipTo = (0..trackNumber).map { queue.removeFirst() }.last()
+        player.playTrack(trackToSkipTo)
+        logger.info("Skipped to track number $trackNumber in guild ${guild.name}")
+    }
+
+    override fun setVolume(guild: Guild, volume: Int) {
+        val player = getOrCreatePlayer(guild)
+        player.volume = volume
+        logger.info("Set volume to $volume in guild ${guild.name}")
+    }
+
+    override fun swap(guild: Guild, first: Int, second: Int) {
+        val queue = queues[guild.idLong] ?: return
+
+        if (first < 0 || second < 0 || first >= queue.size || second >= queue.size) {
+            logger.warn("Invalid track indices: $first, $second in guild ${guild.name}")
+            return
+        }
+
+        val firstTrack = queue.elementAt(first)
+        val secondTrack = queue.elementAt(second)
+
+        queue[first] = secondTrack
+        queue[second] = firstTrack
+
+        logger.info("Swapped tracks at indices $first and $second in guild ${guild.name}")
+    }
+
+    override fun remove(guild: Guild, trackNumber: Int) {
+        val queue = queues[guild.idLong] ?: return
+
+        if (trackNumber < 0 || trackNumber >= queue.size) {
+            logger.warn("Invalid track number: $trackNumber in guild ${guild.name}")
+            return
+        }
+
+        val removedTrack = queue.removeAt(trackNumber)
+        logger.info("Removed track: ${removedTrack.info.title} at index $trackNumber in guild ${guild.name}")
+    }
+
+    override fun shuffle(guild: Guild) {
+        val queue = queues[guild.idLong] ?: return
+
+        if (queue.isEmpty()) {
+            logger.warn("Cannot shuffle an empty queue in guild ${guild.name}")
+            return
+        }
+
+        val shuffledQueue = queue.shuffled()
+        queues[guild.idLong] = ArrayDeque(shuffledQueue)
+
+        logger.info("Shuffled the queue in guild ${guild.name}, new size is ${shuffledQueue.size}")
+    }
+
+    override fun reverse(guild: Guild) {
+        val queue = queues[guild.idLong] ?: return
+
+        if (queue.isEmpty()) {
+            logger.warn("Cannot reverse an empty queue in guild ${guild.name}")
+            return
+        }
+
+        val reversedQueue = queue.reversed()
+        queues[guild.idLong] = ArrayDeque(reversedQueue)
+
+        logger.info("Reversed the queue in guild ${guild.name}, new size is ${reversedQueue.size}")
+    }
+
+    override fun getLavaPlayerStats(): String {
+        val totalPlayers = players.size
+        val playingPlayers = players.count { !it.value.isPaused }
+        val pausedPlayers = players.count { it.value.isPaused }
+        val memory = Runtime.getRuntime()
+        val usedMemory = (memory.totalMemory() - memory.freeMemory()) / (1024 * 1024)
+        val maxMemory = memory.maxMemory() / (1024 * 1024)
+
+        return """
+        **Lavaplayer Stats:**
+        - Total players: $totalPlayers
+        - Playing: $playingPlayers
+        - Paused: $pausedPlayers
+        - Memory usage: $usedMemory MB / $maxMemory MB
+    """.trimIndent()
+    }
 }

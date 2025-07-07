@@ -5,9 +5,19 @@ import pt.paulinoo.dbotkt.audio.AudioCommandManager
 import pt.paulinoo.dbotkt.audio.LavaAudioManager
 import pt.paulinoo.dbotkt.audio.SpotifyHandler
 import pt.paulinoo.dbotkt.command.CommandHandler
-import pt.paulinoo.dbotkt.command.PauseCommand
-import pt.paulinoo.dbotkt.command.PlayCommand
-import pt.paulinoo.dbotkt.command.StopCommand
+import pt.paulinoo.dbotkt.command.ServersCommand
+import pt.paulinoo.dbotkt.command.player.PauseCommand
+import pt.paulinoo.dbotkt.command.player.PlayCommand
+import pt.paulinoo.dbotkt.command.player.RemoveCommand
+import pt.paulinoo.dbotkt.command.player.ResumeCommand
+import pt.paulinoo.dbotkt.command.player.ReverseCommand
+import pt.paulinoo.dbotkt.command.player.ShuffleCommand
+import pt.paulinoo.dbotkt.command.player.SkipCommand
+import pt.paulinoo.dbotkt.command.player.SkipToCommand
+import pt.paulinoo.dbotkt.command.player.StatsCommand
+import pt.paulinoo.dbotkt.command.player.StopCommand
+import pt.paulinoo.dbotkt.command.player.SwapCommand
+import pt.paulinoo.dbotkt.command.player.VolumeCommand
 
 object ServiceLocator {
     private val dotenv = dotenv()
@@ -15,9 +25,19 @@ object ServiceLocator {
     val commandHandler: CommandHandler by lazy {
         CommandHandler(
             listOf(
+                PauseCommand(audioManager),
                 PlayCommand(audioManager),
+                RemoveCommand(audioManager),
+                ResumeCommand(audioManager),
+                ReverseCommand(audioManager),
+                ShuffleCommand(audioManager),
+                SkipCommand(audioManager),
+                SkipToCommand(audioManager),
+                StatsCommand(audioManager),
                 StopCommand(audioManager),
-                PauseCommand(audioManager)
+                SwapCommand(audioManager),
+                VolumeCommand(audioManager),
+                ServersCommand(),
             ),
         )
     }

@@ -1,11 +1,12 @@
-package pt.paulinoo.dbotkt.command
+package pt.paulinoo.dbotkt.command.player
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import pt.paulinoo.dbotkt.audio.AudioCommandManager
+import pt.paulinoo.dbotkt.command.Command
 
 class PauseCommand (
     private val audioCommandManager: AudioCommandManager,
-):Command {
+): Command {
     override val name: String = "pause"
 
     override suspend fun execute(
