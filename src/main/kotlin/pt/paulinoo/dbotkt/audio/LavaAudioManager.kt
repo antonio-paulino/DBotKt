@@ -61,6 +61,15 @@ class LavaAudioManager : AudioCommandManager {
             )
         youtubeSourceManager.useOauth2(dotenv["YT_REFRESH_TOKEN"], true)
         playerManager.registerSourceManager(youtubeSourceManager)
+
+        /*
+        val ytdlManager =
+            YtdlpAudioSourceManager(
+                "/usr/local/bin/yt-dlp",
+            )
+        playerManager.registerSourceManager(ytdlManager)
+         */
+
         AudioSourceManagers.registerLocalSource(playerManager)
 
         playerManager.configuration.apply {
@@ -173,8 +182,15 @@ class LavaAudioManager : AudioCommandManager {
     }
 
     override fun skip(guild: Guild) {
-        getOrCreatePlayer(guild).playTrack(null)
-        logger.info("Skipped current track in guild ${guild.name}")
+        val player = getOrCreatePlayer(guild)
+        val queue = queues[guild.idLong]
+        if (queue == null || queue.isEmpty()) {
+            logger.info("No more tracks to skip to in guild ${guild.name}")
+            return
+        }
+        val nextTrack = queue.removeFirst()
+        player.playTrack(nextTrack)
+        logger.info("Skipped to next track: ${nextTrack.info.title} in guild ${guild.name}")
     }
 
     override fun skipTo(

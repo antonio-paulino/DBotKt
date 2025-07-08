@@ -32,7 +32,7 @@ A Kotlin Discord bot project using Lavaplayer for audio playback and Spotify int
     - `SPOTIFY_CLIENT_ID`: Your Spotify client ID
     - `SPOTIFY_CLIENT_SECRET`: Your Spotify client secret
     - `YT_REFRESH_TOKEN`: Your YouTube refresh token
-    - `PREFIXES`: Command prefixes for the bot separated by `|`commas.
+    - `PREFIXES`: Command prefixes for the bot separated by a space (e.g., `! ?`)
 
 3. **Build the project:**
    ```

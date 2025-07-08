@@ -1,0 +1,8 @@
+services:
+  dbotkt:
+    container_name: DBotKT
+    restart: always
+    env_file: .env
+    build:
+      context: .
+      dockerfile: Dockerfile

@@ -9,7 +9,7 @@ class CommandHandler(private val commands: List<Command>) {
 
     suspend fun handle(event: MessageReceivedEvent) {
         val content = event.message.contentRaw
-        if (dotenv["PREFIXES"].split("|").none { content.startsWith(it) }) return
+        if (dotenv["PREFIXES"].split(" ").none { content.startsWith(it) }) return
 
         val parts = content.substring(1).split("\\s+".toRegex())
         if (parts.isEmpty() || parts[0].isBlank()) return
