@@ -1,6 +1,7 @@
-package pt.paulinoo.dbotkt.command
+package pt.paulinoo.dbotkt.commands
 
 import io.github.cdimascio.dotenv.dotenv
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 class CommandHandler(private val commands: List<Command>) {

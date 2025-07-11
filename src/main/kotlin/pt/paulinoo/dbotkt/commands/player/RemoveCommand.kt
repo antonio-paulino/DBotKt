@@ -1,11 +1,11 @@
-package pt.paulinoo.dbotkt.command.player
+package pt.paulinoo.dbotkt.commands.player
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import pt.paulinoo.dbotkt.audio.AudioCommandManager
-import pt.paulinoo.dbotkt.command.Command
+import pt.paulinoo.dbotkt.audio.AudioManager
+import pt.paulinoo.dbotkt.commands.Command
 
 class RemoveCommand(
-    private val audioCommandManager: AudioCommandManager,
+    private val audioCommandManager: AudioManager,
 ) : Command {
     override val name: String = "remove"
 
@@ -23,8 +23,9 @@ class RemoveCommand(
             event.channel.sendMessage("Invalid song index. Please provide a valid number.").queue()
             return
         }
+        val textChannel = event.channel
 
-        audioCommandManager.remove(event.guild, index - 1)
+        audioCommandManager.remove(textChannel, event.guild, index - 1)
         event.channel.sendMessage("Song at index $index has been removed from the queue.").queue()
     }
 }

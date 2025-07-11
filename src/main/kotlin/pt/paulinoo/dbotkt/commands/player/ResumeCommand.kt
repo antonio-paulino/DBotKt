@@ -1,11 +1,11 @@
-package pt.paulinoo.dbotkt.command.player
+package pt.paulinoo.dbotkt.commands.player
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import pt.paulinoo.dbotkt.audio.AudioCommandManager
-import pt.paulinoo.dbotkt.command.Command
+import pt.paulinoo.dbotkt.audio.AudioManager
+import pt.paulinoo.dbotkt.commands.Command
 
 class ResumeCommand(
-    private val audioCommandManager: AudioCommandManager,
+    private val audioCommandManager: AudioManager,
 ) : Command {
     override val name: String = "resume"
 
@@ -15,9 +15,10 @@ class ResumeCommand(
     ) {
         val guild = event.guild
         val audioManager = guild.audioManager
+        val textChannel = event.channel
 
         if (audioManager.isConnected) {
-            audioCommandManager.resume(guild)
+            audioCommandManager.resume(textChannel, guild)
             event.channel.sendMessage("Playback resumed.").queue()
         } else {
             event.channel.sendMessage("Not connected to a voice channel.").queue()

@@ -1,11 +1,11 @@
-package pt.paulinoo.dbotkt.command.player
+package pt.paulinoo.dbotkt.commands.player
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import pt.paulinoo.dbotkt.audio.AudioCommandManager
-import pt.paulinoo.dbotkt.command.Command
+import pt.paulinoo.dbotkt.audio.AudioManager
+import pt.paulinoo.dbotkt.commands.Command
 
 class SkipToCommand(
-    private val audioCommandManager: AudioCommandManager,
+    private val audioCommandManager: AudioManager,
 ) : Command {
     override val name: String = "skipto"
 
@@ -25,7 +25,8 @@ class SkipToCommand(
         }
 
         val guild = event.guild
-        audioCommandManager.skipTo(guild, trackNumber - 1) // Convert to zero-based index
+        val textChannel = event.channel
+        audioCommandManager.skipTo(textChannel, guild, trackNumber - 1) // Convert to zero-based index
         event.channel.sendMessage("Skipped to track number $trackNumber.").queue()
     }
 }

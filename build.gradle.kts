@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.topi314.lavasrc:lavasrc:2fa21f1")
+    implementation("com.github.topi314.lavasrc:lavasrc:d8cba39")
     implementation("com.github.topi314.lavasrc:lavasrc-protocol:4.7.2")
     implementation("dev.arbjerg:lavaplayer:2.2.4")
     implementation("dev.lavalink.youtube:v2:1.13.3")

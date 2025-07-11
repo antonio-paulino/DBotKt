@@ -1,11 +1,11 @@
-package pt.paulinoo.dbotkt.command.player
+package pt.paulinoo.dbotkt.commands.player
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import pt.paulinoo.dbotkt.audio.AudioCommandManager
-import pt.paulinoo.dbotkt.command.Command
+import pt.paulinoo.dbotkt.audio.AudioManager
+import pt.paulinoo.dbotkt.commands.Command
 
 class ReverseCommand(
-    private val audioCommandManager: AudioCommandManager,
+    private val audioCommandManager: AudioManager,
 ) : Command {
     override val name: String = "reverse"
 
@@ -14,7 +14,8 @@ class ReverseCommand(
         args: List<String>,
     ) {
         val guild = event.guild
-        audioCommandManager.reverse(guild)
+        val textChannel = event.channel
+        audioCommandManager.reverse(textChannel, guild)
         event.channel.sendMessage("Queue reversed.").queue()
     }
 }

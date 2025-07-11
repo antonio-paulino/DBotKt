@@ -8,6 +8,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.requests.GatewayIntent
@@ -33,6 +34,14 @@ class DiscordBot() : CoroutineScope {
                             ServiceLocator.commandHandler.handle(event)
                         }
                     }
+
+                    override fun onButtonInteraction(event: ButtonInteractionEvent) {
+                        when (event.componentId) {
+                            "pause", "resume", "stop", "skip" -> {
+                                launch { ServiceLocator.buttonHandler.handle(event) }
+                            }
+                        }
+                    }
                 },
             )
             .enableIntents(
@@ -45,6 +54,7 @@ class DiscordBot() : CoroutineScope {
             .setActivity(Activity.listening("!help"))
             .build()
             .awaitReady()
+
 
     fun shutdown() {
         jda.shutdown()

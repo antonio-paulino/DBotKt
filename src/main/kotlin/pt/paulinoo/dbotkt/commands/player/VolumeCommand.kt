@@ -1,11 +1,11 @@
-package pt.paulinoo.dbotkt.command.player
+package pt.paulinoo.dbotkt.commands.player
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import pt.paulinoo.dbotkt.audio.AudioCommandManager
-import pt.paulinoo.dbotkt.command.Command
+import pt.paulinoo.dbotkt.audio.AudioManager
+import pt.paulinoo.dbotkt.commands.Command
 
 class VolumeCommand(
-    private val audioCommandManager: AudioCommandManager,
+    private val audioCommandManager: AudioManager,
 ) : Command {
     override val name: String = "volume"
 
@@ -23,8 +23,9 @@ class VolumeCommand(
             event.channel.sendMessage("Invalid volume level. Please provide a number between 0 and 200.").queue()
             return
         }
+        val textChannel = event.channel
 
-        audioCommandManager.setVolume(event.guild, volume)
+        audioCommandManager.setVolume(textChannel, event.guild, volume)
         event.channel.sendMessage("Volume set to $volume.").queue()
     }
 }

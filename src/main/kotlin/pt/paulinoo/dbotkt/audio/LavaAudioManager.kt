@@ -3,6 +3,7 @@ package pt.paulinoo.dbotkt.audio
 import com.github.topi314.lavasearch.SearchManager
 import com.github.topi314.lavasrc.mirror.DefaultMirroringAudioTrackResolver
 import com.github.topi314.lavasrc.spotify.SpotifySourceManager
+import com.sedmelluq.discord.lavaplayer.filter.equalizer.Equalizer
 import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats
 import com.sedmelluq.discord.lavaplayer.player.AudioConfiguration
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
@@ -18,9 +19,11 @@ import dev.lavalink.youtube.clients.TvHtml5Embedded
 import dev.lavalink.youtube.clients.WebWithThumbnail
 import io.github.cdimascio.dotenv.dotenv
 import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import org.slf4j.LoggerFactory
+import pt.paulinoo.dbotkt.embed.PlayerMessageManager
 
-class LavaAudioManager : AudioCommandManager {
+class LavaAudioManager : AudioManager {
     private val logger = LoggerFactory.getLogger(LavaAudioManager::class.java)
 
     private val players = mutableMapOf<Long, AudioPlayer>()
@@ -32,8 +35,7 @@ class LavaAudioManager : AudioCommandManager {
     private val queues = mutableMapOf<Long, ArrayDeque<AudioTrack>>()
 
     private val dotenv =
-        dotenv {
-        }
+        dotenv()
 
     init {
         val mirroringResolver =
@@ -77,26 +79,50 @@ class LavaAudioManager : AudioCommandManager {
             opusEncodingQuality = 10
             outputFormat = StandardAudioDataFormats.DISCORD_OPUS
         }
-
         searchManager.registerSearchManager(spotifySourceManager)
     }
 
-    private fun getOrCreatePlayer(guild: Guild): AudioPlayer {
+    private fun getOrCreatePlayer(guild: Guild, channel: MessageChannel): AudioPlayer {
         return players.computeIfAbsent(guild.idLong) {
             val player = playerManager.createPlayer()
             val queue = queues.computeIfAbsent(guild.idLong) { ArrayDeque() }
-            player.addListener(TrackScheduler(player, queue))
+
+            player.setFilterFactory { track, format, output ->
+                val equalizer = Equalizer(format.channelCount, output)
+
+                equalizer.setGain(0, 0.05f) // Sub-bass (~60 Hz)
+                equalizer.setGain(1, 0.08f) // Bass (~90 Hz)
+                equalizer.setGain(2, 0.04f) // Low-mid (~120 Hz)
+
+                equalizer.setGain(3, 0.0f)
+                equalizer.setGain(4, -0.02f)
+                equalizer.setGain(5, -0.03f)
+                equalizer.setGain(6, -0.03f)
+                equalizer.setGain(7, -0.04f)
+                equalizer.setGain(8, -0.02f)
+                equalizer.setGain(9, 0.0f)
+                equalizer.setGain(10, 0.0f)
+                equalizer.setGain(11, 0.0f)
+                equalizer.setGain(12, 0.0f)
+                equalizer.setGain(13, 0.0f)
+                equalizer.setGain(14, 0.0f)
+
+                listOf(equalizer)
+            }
+
+            player.addListener(TrackScheduler(queue, guild, channel, this ))
             guild.audioManager.sendingHandler = LavaPlayerAudioSendHandler(player)
             player
         }
     }
 
     private fun loadAndPlay(
+        channel: MessageChannel,
         guild: Guild,
         trackUrl: String,
         queueAll: Boolean,
     ) {
-        val player = getOrCreatePlayer(guild)
+        val player = getOrCreatePlayer(guild, channel)
         val queue = queues.computeIfAbsent(guild.idLong) { ArrayDeque() }
 
         playerManager.loadItemOrdered(
@@ -139,50 +165,68 @@ class LavaAudioManager : AudioCommandManager {
     }
 
     override fun loadAndPlayPlaylist(
+        channel: MessageChannel,
         guild: Guild,
         trackUrl: String,
     ) {
-        loadAndPlay(guild, trackUrl, queueAll = true)
+        loadAndPlay(channel, guild, trackUrl, queueAll = true)
     }
 
     override fun loadAndPlaySong(
+        channel: MessageChannel,
         guild: Guild,
         trackUrl: String,
     ) {
-        loadAndPlay(guild, trackUrl, queueAll = false)
+        loadAndPlay(channel, guild, trackUrl, queueAll = false)
     }
 
     override fun loadAndPlaySpotifyPlaylist(
+        channel: MessageChannel,
         guild: Guild,
         songsMetadata: List<String>,
     ) {
         songsMetadata.forEach { song ->
             val trackUrl = "ytsearch:$song"
-            loadAndPlay(guild, trackUrl, queueAll = false)
+            loadAndPlay(channel, guild, trackUrl, queueAll = false)
         }
     }
 
-    override fun pause(guild: Guild) {
-        getOrCreatePlayer(guild).isPaused = true
+    override fun pause(
+        channel: MessageChannel,
+        guild: Guild
+    ) {
+        getOrCreatePlayer(guild, channel).isPaused = true
         logger.info("Paused playback in guild ${guild.name}")
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
-    override fun resume(guild: Guild) {
-        getOrCreatePlayer(guild).isPaused = false
+    override fun resume(
+        channel: MessageChannel,
+        guild: Guild
+    ) {
+        getOrCreatePlayer(guild, channel).isPaused = false
         logger.info("Resumed playback in guild ${guild.name}")
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
-    override fun stop(guild: Guild) {
-        val player = getOrCreatePlayer(guild)
+    override fun stop(
+        channel: MessageChannel,
+        guild: Guild
+    ) {
+        val player = getOrCreatePlayer(guild, channel)
         player.stopTrack()
         queues.remove(guild.idLong)
+        PlayerMessageManager.removePlayerMessage(guild)
         players.remove(guild.idLong)
         guild.audioManager.closeAudioConnection()
         logger.info("Stopped playback and cleared queue in guild ${guild.name}")
     }
 
-    override fun skip(guild: Guild) {
-        val player = getOrCreatePlayer(guild)
+    override fun skip(
+        channel: MessageChannel,
+        guild: Guild
+    ) {
+        val player = getOrCreatePlayer(guild, channel)
         val queue = queues[guild.idLong]
         if (queue == null || queue.isEmpty()) {
             logger.info("No more tracks to skip to in guild ${guild.name}")
@@ -191,13 +235,15 @@ class LavaAudioManager : AudioCommandManager {
         val nextTrack = queue.removeFirst()
         player.playTrack(nextTrack)
         logger.info("Skipped to next track: ${nextTrack.info.title} in guild ${guild.name}")
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
     override fun skipTo(
+        channel: MessageChannel,
         guild: Guild,
         trackNumber: Int,
     ) {
-        val player = getOrCreatePlayer(guild)
+        val player = getOrCreatePlayer(guild, channel)
         val queue = queues[guild.idLong] ?: return
 
         if (trackNumber < 0 || trackNumber >= queue.size) {
@@ -208,18 +254,22 @@ class LavaAudioManager : AudioCommandManager {
         val trackToSkipTo = (0..trackNumber).map { queue.removeFirst() }.last()
         player.playTrack(trackToSkipTo)
         logger.info("Skipped to track number $trackNumber in guild ${guild.name}")
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
     override fun setVolume(
+        channel: MessageChannel,
         guild: Guild,
         volume: Int,
     ) {
-        val player = getOrCreatePlayer(guild)
+        val player = getOrCreatePlayer(guild, channel)
         player.volume = volume
         logger.info("Set volume to $volume in guild ${guild.name}")
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
     override fun swap(
+        channel: MessageChannel,
         guild: Guild,
         first: Int,
         second: Int,
@@ -238,9 +288,11 @@ class LavaAudioManager : AudioCommandManager {
         queue[second] = firstTrack
 
         logger.info("Swapped tracks at indices $first and $second in guild ${guild.name}")
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
     override fun remove(
+        channel: MessageChannel,
         guild: Guild,
         trackNumber: Int,
     ) {
@@ -253,9 +305,13 @@ class LavaAudioManager : AudioCommandManager {
 
         val removedTrack = queue.removeAt(trackNumber)
         logger.info("Removed track: ${removedTrack.info.title} at index $trackNumber in guild ${guild.name}")
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
-    override fun shuffle(guild: Guild) {
+    override fun shuffle(
+        channel: MessageChannel,
+        guild: Guild
+    ) {
         val queue = queues[guild.idLong] ?: return
 
         if (queue.isEmpty()) {
@@ -267,9 +323,13 @@ class LavaAudioManager : AudioCommandManager {
         queues[guild.idLong] = ArrayDeque(shuffledQueue)
 
         logger.info("Shuffled the queue in guild ${guild.name}, new size is ${shuffledQueue.size}")
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
-    override fun reverse(guild: Guild) {
+    override fun reverse(
+        channel: MessageChannel,
+        guild: Guild
+    ) {
         val queue = queues[guild.idLong] ?: return
 
         if (queue.isEmpty()) {
@@ -281,8 +341,14 @@ class LavaAudioManager : AudioCommandManager {
         queues[guild.idLong] = ArrayDeque(reversedQueue)
 
         logger.info("Reversed the queue in guild ${guild.name}, new size is ${reversedQueue.size}")
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
+    override fun getGuildPlayer(
+        guild: Guild
+    ): AudioPlayer {
+        return players[guild.idLong] ?: throw IllegalStateException("No audio player found for guild ${guild.name}")
+    }
     override fun getLavaPlayerStats(): String {
         val totalPlayers = players.size
         val playingPlayers = players.count { !it.value.isPaused }
