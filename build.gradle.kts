@@ -54,6 +54,7 @@ tasks.register<Jar>("uberJar") {
         attributes["Main-Class"] = "pt.paulinoo.dbotkt.BotKt"
     }
     archiveBaseName.set(outputName)
+    archiveVersion.set("")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(sourceSets.main.get().output)
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
