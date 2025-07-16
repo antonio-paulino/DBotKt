@@ -1,5 +1,6 @@
 package pt.paulinoo.dbotkt.bot
 
+import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory
 import io.github.cdimascio.dotenv.dotenv
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -27,6 +28,13 @@ class DiscordBot() : CoroutineScope {
     @OptIn(DelicateCoroutinesApi::class)
     private val jda =
         JDABuilder.createDefault(token)
+            .enableIntents(
+                GatewayIntent.GUILD_MESSAGES,
+                GatewayIntent.MESSAGE_CONTENT,
+                GatewayIntent.GUILD_VOICE_STATES,
+                GatewayIntent.GUILD_MEMBERS,
+                GatewayIntent.GUILD_WEBHOOKS,
+            )
             .addEventListeners(
                 object : ListenerAdapter() {
                     override fun onMessageReceived(event: MessageReceivedEvent) {
@@ -36,25 +44,16 @@ class DiscordBot() : CoroutineScope {
                     }
 
                     override fun onButtonInteraction(event: ButtonInteractionEvent) {
-                        when (event.componentId) {
-                            "pause", "resume", "stop", "skip" -> {
-                                launch { ServiceLocator.buttonHandler.handle(event) }
-                            }
+                        launch {
+                            ServiceLocator.buttonHandler.handle(event)
                         }
                     }
                 },
             )
-            .enableIntents(
-                GatewayIntent.GUILD_MESSAGES,
-                GatewayIntent.MESSAGE_CONTENT,
-                GatewayIntent.GUILD_VOICE_STATES,
-                GatewayIntent.GUILD_MESSAGES,
-                GatewayIntent.GUILD_MEMBERS,
-            )
+            .setAudioSendFactory(NativeAudioSendFactory())
             .setActivity(Activity.listening("!help"))
             .build()
             .awaitReady()
-
 
     fun shutdown() {
         jda.shutdown()

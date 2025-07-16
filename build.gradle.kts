@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "pt.paulinoo"
-version = "0.1"
+version = "0.2"
 
 repositories {
     mavenCentral()
@@ -15,7 +15,16 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.topi314.lavasrc:lavasrc:d8cba39")
+    implementation("club.minnced:udpqueue-native-linux-x86-64:0.2.9")
+    implementation("club.minnced:udpqueue-native-linux-x86:0.2.9")
+    implementation("club.minnced:udpqueue-native-linux-aarch64:0.2.9")
+    implementation("club.minnced:udpqueue-native-linux-arm:0.2.9")
+    implementation("club.minnced:udpqueue-native-linux-musl-x86-64:0.2.9")
+    implementation("club.minnced:udpqueue-native-linux-musl-aarch64:0.2.9")
+    implementation("club.minnced:udpqueue-native-win-x86-64:0.2.9")
+    implementation("club.minnced:udpqueue-native-win-x86:0.2.9")
+    implementation("club.minnced:udpqueue-native-darwin:0.2.9")
+    implementation("com.github.topi314.lavasrc:lavasrc:dbda8e7")
     implementation("com.github.topi314.lavasrc:lavasrc-protocol:4.7.2")
     implementation("dev.arbjerg:lavaplayer:2.2.4")
     implementation("dev.lavalink.youtube:v2:1.13.3")

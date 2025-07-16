@@ -1,25 +1,29 @@
 package pt.paulinoo.dbotkt.di
 
 import io.github.cdimascio.dotenv.dotenv
-import pt.paulinoo.dbotkt.audio.AudioManager
-import pt.paulinoo.dbotkt.audio.LavaAudioManager
-import pt.paulinoo.dbotkt.audio.SpotifyHandler
-import pt.paulinoo.dbotkt.buttons.ButtonHandler
-import pt.paulinoo.dbotkt.buttons.PauseResumeButton
 import pt.paulinoo.dbotkt.commands.CommandHandler
 import pt.paulinoo.dbotkt.commands.ServersCommand
-import pt.paulinoo.dbotkt.commands.player.PauseCommand
-import pt.paulinoo.dbotkt.commands.player.PlayCommand
-import pt.paulinoo.dbotkt.commands.player.RemoveCommand
-import pt.paulinoo.dbotkt.commands.player.ResumeCommand
-import pt.paulinoo.dbotkt.commands.player.ReverseCommand
-import pt.paulinoo.dbotkt.commands.player.ShuffleCommand
-import pt.paulinoo.dbotkt.commands.player.SkipCommand
-import pt.paulinoo.dbotkt.commands.player.SkipToCommand
-import pt.paulinoo.dbotkt.commands.player.StatsCommand
-import pt.paulinoo.dbotkt.commands.player.StopCommand
-import pt.paulinoo.dbotkt.commands.player.SwapCommand
-import pt.paulinoo.dbotkt.commands.player.VolumeCommand
+import pt.paulinoo.dbotkt.player.audio.AudioManager
+import pt.paulinoo.dbotkt.player.audio.LavaAudioManager
+import pt.paulinoo.dbotkt.player.audio.SpotifyHandler
+import pt.paulinoo.dbotkt.player.buttons.ButtonHandler
+import pt.paulinoo.dbotkt.player.buttons.PauseResumeButton
+import pt.paulinoo.dbotkt.player.buttons.SkipButton
+import pt.paulinoo.dbotkt.player.buttons.StopButton
+import pt.paulinoo.dbotkt.player.buttons.VolumeDownButton
+import pt.paulinoo.dbotkt.player.buttons.VolumeUpButton
+import pt.paulinoo.dbotkt.player.commands.PauseCommand
+import pt.paulinoo.dbotkt.player.commands.PlayCommand
+import pt.paulinoo.dbotkt.player.commands.RemoveCommand
+import pt.paulinoo.dbotkt.player.commands.ResumeCommand
+import pt.paulinoo.dbotkt.player.commands.ReverseCommand
+import pt.paulinoo.dbotkt.player.commands.ShuffleCommand
+import pt.paulinoo.dbotkt.player.commands.SkipCommand
+import pt.paulinoo.dbotkt.player.commands.SkipToCommand
+import pt.paulinoo.dbotkt.player.commands.StatsCommand
+import pt.paulinoo.dbotkt.player.commands.StopCommand
+import pt.paulinoo.dbotkt.player.commands.SwapCommand
+import pt.paulinoo.dbotkt.player.commands.VolumeCommand
 
 object ServiceLocator {
     private val dotenv = dotenv()
@@ -46,8 +50,12 @@ object ServiceLocator {
     val buttonHandler by lazy {
         ButtonHandler(
             listOf(
-                PauseResumeButton(audioManager)
-            )
+                PauseResumeButton(audioManager),
+                StopButton(audioManager),
+                SkipButton(audioManager),
+                VolumeUpButton(audioManager),
+                VolumeDownButton(audioManager),
+            ),
         )
     }
     val spotifyHandler by lazy {
