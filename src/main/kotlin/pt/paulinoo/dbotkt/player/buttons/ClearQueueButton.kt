@@ -18,12 +18,13 @@ class ClearQueueButton(private val audioManager: AudioManager) : CustomButton {
         audioManager.clearQueue(event.channel, guild)
         event.deferEdit().queue()
 
-        val embed = Embed.create(
-            EmbedLevel.INFO,
-            "Queue cleared."
-        ).build()
-        event.channel.sendMessageEmbeds(embed).queue{
-            message ->
+        val embed =
+            Embed.create(
+                EmbedLevel.INFO,
+                "Queue cleared.",
+            ).build()
+        event.channel.sendMessageEmbeds(embed).queue {
+                message ->
             message.delete().queueAfter(10, TimeUnit.SECONDS)
         }
     }
