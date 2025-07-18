@@ -92,7 +92,12 @@ interface AudioManager {
         guild: Guild,
     )
 
-    fun getGuildPlayer(guild: Guild): GuildAudioPlayer
+    fun getGuildPlayer(guild: Guild): GuildAudioPlayer?
+
+    fun clearQueue(
+        channel: MessageChannel,
+        guild: Guild,
+    )
 
     fun isPaused(guild: Guild): Boolean
 }

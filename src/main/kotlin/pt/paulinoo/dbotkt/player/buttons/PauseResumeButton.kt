@@ -6,7 +6,7 @@ import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
 import java.util.concurrent.TimeUnit
 
-class PauseResumeButton(private val audioManager: AudioManager) : Button {
+class PauseResumeButton(private val audioManager: AudioManager) : CustomButton {
     override val customId: String = "pause_button"
 
     override suspend fun handle(event: ButtonInteractionEvent) {

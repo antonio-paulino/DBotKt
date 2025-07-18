@@ -8,7 +8,7 @@ import pt.paulinoo.dbotkt.player.audio.AudioManager
 import java.util.concurrent.TimeUnit
 
 class PlayCommand(
-    private val audioManager: AudioManager,
+    private val audioCommandManager: AudioManager,
 ) : Command {
     override val name: String = "play"
 
@@ -48,15 +48,15 @@ class PlayCommand(
 
         when {
             isSpotifyPlaylist || isYoutubePlaylist -> {
-                audioManager.loadAndPlayPlaylist(textChannel, guild, query, requesterId)
+                audioCommandManager.loadAndPlayPlaylist(textChannel, guild, query, requesterId)
             }
 
             isYoutubeVideo -> {
-                audioManager.loadAndPlaySong(textChannel, guild, query, requesterId)
+                audioCommandManager.loadAndPlaySong(textChannel, guild, query, requesterId)
             }
 
             else -> {
-                audioManager.loadAndPlaySong(textChannel, guild, "ytsearch:$query", requesterId)
+                audioCommandManager.loadAndPlaySong(textChannel, guild, "ytsearch:$query", requesterId)
             }
         }
     }

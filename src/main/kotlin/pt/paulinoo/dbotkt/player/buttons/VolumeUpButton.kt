@@ -6,7 +6,7 @@ import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
 import java.util.concurrent.TimeUnit
 
-class VolumeUpButton(private val audioManager: AudioManager) : Button {
+class VolumeUpButton(private val audioManager: AudioManager) : CustomButton {
     override val customId: String = "volume_up_button"
 
     override suspend fun handle(event: ButtonInteractionEvent) {
@@ -17,6 +17,18 @@ class VolumeUpButton(private val audioManager: AudioManager) : Button {
             }
         val textChannel = event.channel
         val player = audioManager.getGuildPlayer(guild)
+
+        if (player == null) {
+            val embed =
+                Embed.create(
+                    EmbedLevel.ERROR,
+                    "No player found for this guild.",
+                ).build()
+            event.channel.sendMessageEmbeds(embed).queue { message ->
+                message.delete().queueAfter(10, TimeUnit.SECONDS)
+            }
+            return
+        }
 
         if (player.player.volume < 200) {
             val newVolume = (player.player.volume + 10).coerceAtMost(200)

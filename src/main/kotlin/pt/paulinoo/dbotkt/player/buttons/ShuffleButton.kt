@@ -6,7 +6,7 @@ import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
 import java.util.concurrent.TimeUnit
 
-class ShuffleButton(private val audioManager: AudioManager) : Button {
+class ShuffleButton(private val audioManager: AudioManager) : CustomButton {
     override val customId: String = "shuffle_button"
 
     override suspend fun handle(event: ButtonInteractionEvent) {

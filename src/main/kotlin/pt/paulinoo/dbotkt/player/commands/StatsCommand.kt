@@ -1,5 +1,6 @@
 package pt.paulinoo.dbotkt.player.commands
 
+import io.github.cdimascio.dotenv.dotenv
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import pt.paulinoo.dbotkt.commands.Command
 import pt.paulinoo.dbotkt.embed.Embed
@@ -12,10 +13,19 @@ class StatsCommand(
 ) : Command {
     override val name: String = "stats"
 
+    private val admins: Set<String> =
+        dotenv()["ADMIN_IDS"]
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.toSet()
+            ?: emptySet()
+
     override suspend fun execute(
         event: MessageReceivedEvent,
         args: List<String>,
     ) {
+        if (event.author.id !in admins) return
+
         val usageMessage = audioCommandManager.getLavaPlayerStats()
         val embed =
             Embed.create(
@@ -23,6 +33,7 @@ class StatsCommand(
                 description = usageMessage,
                 level = EmbedLevel.INFO,
             ).build()
+
         event.channel.sendMessageEmbeds(embed).queue { message ->
             message.delete().queueAfter(20, TimeUnit.SECONDS)
         }

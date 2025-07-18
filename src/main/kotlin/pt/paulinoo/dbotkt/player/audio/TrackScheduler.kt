@@ -68,23 +68,23 @@ class TrackScheduler(
         }
     }
 
+
     override fun onTrackStart(
         player: AudioPlayer,
         track: AudioTrack,
     ) {
         disconnectJob?.cancel()
         disconnectJob = null
-        super.onTrackStart(player, track)
-        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, audioManager)
+        //PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, audioManager)
     }
 
+
+
     override fun onPlayerPause(player: AudioPlayer?) {
-        super.onPlayerPause(player)
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, audioManager)
     }
 
     override fun onPlayerResume(player: AudioPlayer?) {
-        super.onPlayerResume(player)
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, audioManager)
     }
 }

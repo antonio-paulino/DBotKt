@@ -22,7 +22,14 @@ class ResumeCommand(
 
         if (audioManager.isConnected) {
             audioCommandManager.resume(textChannel, guild)
-            event.channel.sendMessage("Playback resumed.").queue()
+            val embed =
+                Embed.create(
+                    description = "Playback resumed.",
+                    level = EmbedLevel.INFO,
+                ).build()
+            textChannel.sendMessageEmbeds(embed).queue { message ->
+                message.delete().queueAfter(10, TimeUnit.SECONDS)
+            }
         } else {
             val embed =
                 Embed.create(

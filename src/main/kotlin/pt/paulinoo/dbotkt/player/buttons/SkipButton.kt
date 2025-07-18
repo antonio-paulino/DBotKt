@@ -6,7 +6,7 @@ import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
 import java.util.concurrent.TimeUnit
 
-class SkipButton(private val audioManager: AudioManager) : Button {
+class SkipButton(private val audioManager: AudioManager) : CustomButton {
     override val customId: String = "skip_button"
 
     override suspend fun handle(event: ButtonInteractionEvent) {

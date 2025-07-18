@@ -7,13 +7,19 @@ import pt.paulinoo.dbotkt.player.audio.AudioManager
 import pt.paulinoo.dbotkt.player.audio.LavaAudioManager
 import pt.paulinoo.dbotkt.player.audio.SpotifyHandler
 import pt.paulinoo.dbotkt.player.buttons.ButtonHandler
+import pt.paulinoo.dbotkt.player.buttons.ClearQueueButton
+import pt.paulinoo.dbotkt.player.buttons.LoopButton
 import pt.paulinoo.dbotkt.player.buttons.PauseResumeButton
+import pt.paulinoo.dbotkt.player.buttons.QueueButton
+import pt.paulinoo.dbotkt.player.buttons.ShuffleButton
 import pt.paulinoo.dbotkt.player.buttons.SkipButton
 import pt.paulinoo.dbotkt.player.buttons.StopButton
 import pt.paulinoo.dbotkt.player.buttons.VolumeDownButton
 import pt.paulinoo.dbotkt.player.buttons.VolumeUpButton
+import pt.paulinoo.dbotkt.player.commands.ClearQueueCommand
 import pt.paulinoo.dbotkt.player.commands.PauseCommand
 import pt.paulinoo.dbotkt.player.commands.PlayCommand
+import pt.paulinoo.dbotkt.player.commands.QueueCommand
 import pt.paulinoo.dbotkt.player.commands.RemoveCommand
 import pt.paulinoo.dbotkt.player.commands.ResumeCommand
 import pt.paulinoo.dbotkt.player.commands.ReverseCommand
@@ -43,6 +49,8 @@ object ServiceLocator {
                 StopCommand(audioManager),
                 SwapCommand(audioManager),
                 VolumeCommand(audioManager),
+                QueueCommand(audioManager),
+                ClearQueueCommand(audioManager),
                 ServersCommand(),
             ),
         )
@@ -55,6 +63,10 @@ object ServiceLocator {
                 SkipButton(audioManager),
                 VolumeUpButton(audioManager),
                 VolumeDownButton(audioManager),
+                ClearQueueButton(audioManager),
+                LoopButton(audioManager),
+                QueueButton(audioManager),
+                ShuffleButton(audioManager),
             ),
         )
     }

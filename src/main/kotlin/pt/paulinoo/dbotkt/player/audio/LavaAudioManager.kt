@@ -19,7 +19,10 @@ import io.github.cdimascio.dotenv.dotenv
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import org.slf4j.LoggerFactory
+import pt.paulinoo.dbotkt.embed.Embed
+import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.embed.PlayerMessageManager
+import java.util.concurrent.TimeUnit
 
 class LavaAudioManager : AudioManager {
     private val logger = LoggerFactory.getLogger(LavaAudioManager::class.java)
@@ -120,9 +123,28 @@ class LavaAudioManager : AudioManager {
                     if (!player.player.startTrack(track, true)) {
                         player.queue.add(track)
                         logger.info("Added track to queue: ${track.info.title}")
+                        val embed =
+                            Embed.create(
+                                EmbedLevel.INFO,
+                                "Track Added",
+                                "Added track: ${track.info.title} - ${track.info.author} to the queue.",
+                            ).build()
+                        channel.sendMessageEmbeds(embed).queue {
+                            it.delete().queueAfter(10, TimeUnit.SECONDS)
+                        }
                     } else {
                         logger.info("Playing track immediately: ${track.info.title}")
+                        val embed =
+                            Embed.create(
+                                EmbedLevel.INFO,
+                                "Now Playing",
+                                "Now playing: ${track.info.title} - ${track.info.author}",
+                            ).build()
+                        channel.sendMessageEmbeds(embed).queue {
+                            it.delete().queueAfter(10, TimeUnit.SECONDS)
+                        }
                     }
+                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                 }
 
                 override fun playlistLoaded(playlist: AudioPlaylist) {
@@ -135,10 +157,42 @@ class LavaAudioManager : AudioManager {
                         if (queueAll) {
                             playlist.tracks.drop(1).forEach { player.queue.add(it) }
                             logger.info("Playlist loaded: ${playlist.name}, queue size is now ${player.queue.size + 1}")
+                            val embed =
+                                Embed.create(
+                                    EmbedLevel.INFO,
+                                    "Playlist Loaded",
+                                    "Added ${playlist.tracks.size} tracks from playlist: ${playlist.name} to the queue.",
+                                ).build()
+                            channel.sendMessageEmbeds(embed).queue {
+                                it.delete().queueAfter(10, TimeUnit.SECONDS)
+                            }
                         } else {
-                            logger.info("Loaded only the first track from playlist: ${firstTrack.info.title}")
+                            if (player.player.playingTrack == null) {
+                                logger.info("Now playing: ${firstTrack.info.title}")
+                                val embed =
+                                    Embed.create(
+                                        EmbedLevel.INFO,
+                                        "Now Playing",
+                                        "Now playing: ${firstTrack.info.title} - ${firstTrack.info.author}",
+                                    ).build()
+                                channel.sendMessageEmbeds(embed).queue {
+                                    it.delete().queueAfter(10, TimeUnit.SECONDS)
+                                }
+                            } else {
+                                logger.info("Loaded only the first track from playlist: ${firstTrack.info.title}")
+                                val embed =
+                                    Embed.create(
+                                        EmbedLevel.INFO,
+                                        "Track Loaded",
+                                        "Added track: ${firstTrack.info.title} - ${firstTrack.info.author} to the queue.",
+                                    ).build()
+                                channel.sendMessageEmbeds(embed).queue {
+                                    it.delete().queueAfter(10, TimeUnit.SECONDS)
+                                }
+                            }
                         }
                     }
+                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                 }
 
                 override fun noMatches() {
@@ -157,14 +211,19 @@ class LavaAudioManager : AudioManager {
         guild: Guild,
         trackUrl: String,
         requesterId: Long,
-    ) = loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = true)
+    ) {
+        loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = true)
+    }
 
     override fun loadAndPlaySong(
         channel: MessageChannel,
         guild: Guild,
         trackUrl: String,
         requesterId: Long,
-    ) = loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = false)
+    ) {
+        loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = false)
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
+    }
 
     override fun loadAndPlaySpotifyPlaylist(
         channel: MessageChannel,
@@ -175,6 +234,7 @@ class LavaAudioManager : AudioManager {
         songsMetadata.forEach { song ->
             val trackUrl = "ytsearch:$song"
             loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = false)
+            PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
         }
     }
 
@@ -360,8 +420,17 @@ class LavaAudioManager : AudioManager {
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
-    override fun getGuildPlayer(guild: Guild): GuildAudioPlayer =
-        players[guild.idLong] ?: throw IllegalStateException("No player found for guild ${guild.name}")
+    override fun getGuildPlayer(guild: Guild): GuildAudioPlayer? = players[guild.idLong]
+
+    override fun clearQueue(
+        channel: MessageChannel,
+        guild: Guild,
+    ) {
+        val player = getOrCreatePlayer(guild, channel)
+        player.queue.clear()
+        logger.info("Cleared the queue in guild ${guild.name}")
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
+    }
 
     override fun getLavaPlayerStats(): String {
         val totalPlayers = players.size

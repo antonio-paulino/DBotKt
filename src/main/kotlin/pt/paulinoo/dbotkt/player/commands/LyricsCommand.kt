@@ -5,7 +5,7 @@ import pt.paulinoo.dbotkt.commands.Command
 import pt.paulinoo.dbotkt.player.audio.AudioManager
 
 class LyricsCommand(
-    private val audioManager: AudioManager,
+    private val audioCommandManager: AudioManager,
 ) : Command {
     override val name: String = "lyrics"
 
