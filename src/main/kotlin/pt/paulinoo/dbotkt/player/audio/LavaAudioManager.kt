@@ -185,10 +185,9 @@ class LavaAudioManager : AudioManager {
                                 }
                             }
                         }
-                        if (player.player.startTrack(firstTrack, true))
-                            {
-                                player.queue.remove(firstTrack)
-                            } else {
+                        if (player.player.startTrack(firstTrack, true)) {
+                            player.queue.remove(firstTrack)
+                        } else {
                             player.queue.add(firstTrack)
                         }
                     }
