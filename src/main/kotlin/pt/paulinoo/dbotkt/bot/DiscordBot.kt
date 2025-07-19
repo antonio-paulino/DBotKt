@@ -16,6 +16,7 @@ import pt.paulinoo.dbotkt.di.ServiceLocator
 import pt.paulinoo.dbotkt.di.ServiceLocator.audioManager
 import pt.paulinoo.dbotkt.player.listeners.LyricsButtonListener
 import pt.paulinoo.dbotkt.player.listeners.QueueButtonListener
+import pt.paulinoo.dbotkt.player.listeners.VoiceChannelEmptyListener
 import java.time.Duration
 
 class DiscordBot() : CoroutineScope {
@@ -52,6 +53,7 @@ class DiscordBot() : CoroutineScope {
                 },
                 QueueButtonListener(audioManager),
                 LyricsButtonListener(audioManager),
+                VoiceChannelEmptyListener(audioManager),
             )
             .setAudioSendFactory(NativeAudioSendFactory())
             .setActivity(Activity.listening("!help"))
