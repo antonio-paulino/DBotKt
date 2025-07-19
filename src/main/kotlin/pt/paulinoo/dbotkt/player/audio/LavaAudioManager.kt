@@ -127,7 +127,6 @@ class LavaAudioManager : AudioManager {
                             ).build()
                         channel.sendMessageEmbeds(embed).queue {
                             it.delete().queueAfter(10, TimeUnit.SECONDS)
-                            PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                         }
                     } else {
                         logger.info("Playing track immediately: ${track.info.title}")
@@ -158,7 +157,6 @@ class LavaAudioManager : AudioManager {
                                 ).build()
                             channel.sendMessageEmbeds(embed).queue {
                                 it.delete().queueAfter(10, TimeUnit.SECONDS)
-                                PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                             }
                         } else {
                             if (player.player.playingTrack == null) {
@@ -182,7 +180,6 @@ class LavaAudioManager : AudioManager {
                                     ).build()
                                 channel.sendMessageEmbeds(embed).queue {
                                     it.delete().queueAfter(10, TimeUnit.SECONDS)
-                                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                                 }
                             }
                         }

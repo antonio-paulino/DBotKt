@@ -5,9 +5,10 @@ import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
 import pt.paulinoo.dbotkt.player.audio.AudioManager
+import java.util.concurrent.ConcurrentHashMap
 
 object PlayerMessageManager {
-    private val playerMessages = mutableMapOf<Long, Message>() // guildId -> message
+    private val playerMessages = ConcurrentHashMap<Long, Message>()
 
     fun sendOrUpdatePlayerMessage(
         channel: MessageChannel,

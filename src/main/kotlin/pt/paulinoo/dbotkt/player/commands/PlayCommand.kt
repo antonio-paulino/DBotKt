@@ -5,6 +5,7 @@ import pt.paulinoo.dbotkt.commands.Command
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
+import pt.paulinoo.dbotkt.player.embed.PlayerMessageManager
 import java.util.concurrent.TimeUnit
 
 class PlayCommand(
@@ -59,5 +60,6 @@ class PlayCommand(
                 audioCommandManager.loadAndPlaySong(textChannel, guild, "ytsearch:$query", requesterId)
             }
         }
+        PlayerMessageManager.sendOrUpdatePlayerMessage(event.channel, guild, audioCommandManager)
     }
 }
