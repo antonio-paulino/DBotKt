@@ -1,6 +1,5 @@
 package pt.paulinoo.dbotkt.commands
 
-import io.github.cdimascio.dotenv.dotenv
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
@@ -11,7 +10,7 @@ class ServersCommand : Command {
     override val name: String = "servers"
 
     private val admins: Set<String> =
-        dotenv()["ADMIN_IDS"]
+        System.getenv("ADMIN_IDS")
             ?.split(",")
             ?.map { it.trim() }
             ?.toSet()

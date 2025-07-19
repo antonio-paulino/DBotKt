@@ -1,6 +1,5 @@
 package pt.paulinoo.dbotkt.player.commands
 
-import io.github.cdimascio.dotenv.dotenv
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import pt.paulinoo.dbotkt.commands.Command
 import pt.paulinoo.dbotkt.embed.Embed
@@ -14,7 +13,7 @@ class StatsCommand(
     override val name: String = "stats"
 
     private val admins: Set<String> =
-        dotenv()["ADMIN_IDS"]
+        System.getenv("ADMIN_IDS")
             ?.split(",")
             ?.map { it.trim() }
             ?.toSet()

@@ -2,7 +2,11 @@ services:
   dbotkt:
     container_name: DBotKT
     restart: always
-    env_file: .env
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: paulinoo/dbotkt:latest
+    environment:
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN}
+      - PREFIXES=! . # Space-separated list of command prefixes
+      - ADMIN_IDS=${ADMIN_IDS} # Comma-separated list of admin IDs

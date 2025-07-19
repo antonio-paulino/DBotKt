@@ -15,7 +15,6 @@ import dev.lavalink.youtube.YoutubeAudioSourceManager
 import dev.lavalink.youtube.clients.MWebWithThumbnail
 import dev.lavalink.youtube.clients.TvHtml5Embedded
 import dev.lavalink.youtube.clients.WebWithThumbnail
-import io.github.cdimascio.dotenv.dotenv
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import org.slf4j.LoggerFactory
@@ -32,16 +31,15 @@ class LavaAudioManager : AudioManager {
     val playerManager = DefaultAudioPlayerManager()
 
     val searchManager = SearchManager()
-    private val dotenv = dotenv()
 
     init {
         val mirroringResolver = DefaultMirroringAudioTrackResolver(null)
 
         val spotifySourceManager =
             SpotifySourceManager(
-                dotenv["SPOTIFY_CLIENT_ID"]
+                System.getenv("SPOTIFY_CLIENT_ID")
                     ?: throw IllegalArgumentException("Missing SPOTIFY_CLIENT_ID"),
-                dotenv["SPOTIFY_CLIENT_SECRET"]
+                System.getenv("SPOTIFY_CLIENT_SECRET")
                     ?: throw IllegalArgumentException("Missing SPOTIFY_CLIENT_SECRET"),
                 "US",
                 playerManager,
@@ -55,7 +53,7 @@ class LavaAudioManager : AudioManager {
                 WebWithThumbnail(),
                 MWebWithThumbnail(),
             )
-        youtubeSourceManager.useOauth2(dotenv["YT_REFRESH_TOKEN"], true)
+        youtubeSourceManager.useOauth2(System.getenv("YT_REFRESH_TOKEN"), true)
         playerManager.registerSourceManager(youtubeSourceManager)
 
         // Uncomment if yt-dlp support is needed

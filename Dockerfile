@@ -14,10 +14,7 @@ COPY --from=mwader/static-ffmpeg:7.1 /ffmpeg /usr/local/bin/
 COPY --from=mwader/static-ffmpeg:7.1 /ffprobe /usr/local/bin/
 
 # Copy your jar file into the container
-COPY DBotKt-0.1.jar .
-
-
-COPY .env .env
+COPY DBotKt.jar .
 
 # Run the jar file
-CMD ["java", "-jar", "DBotKt-0.1.jar"]
+CMD ["java", "-jar", "DBotKt.jar"]

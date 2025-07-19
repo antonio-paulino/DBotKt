@@ -1,7 +1,6 @@
 package pt.paulinoo.dbotkt.bot
 
 import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory
-import io.github.cdimascio.dotenv.dotenv
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -19,10 +18,9 @@ import pt.paulinoo.dbotkt.player.embed.QueueButtonListener
 import java.time.Duration
 
 class DiscordBot() : CoroutineScope {
-    private val dotenv = dotenv()
     private var token: String =
-        dotenv["DISCORD_TOKEN"]
-            ?: throw IllegalArgumentException("DISCORD_TOKEN not found in .env file")
+        System.getenv("DISCORD_TOKEN")
+            ?: throw IllegalArgumentException("DISCORD_TOKEN environment variable is not set")
 
     private val job = SupervisorJob()
     override val coroutineContext = Dispatchers.Default + job

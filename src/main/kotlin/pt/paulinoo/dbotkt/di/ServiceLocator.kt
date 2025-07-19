@@ -1,6 +1,5 @@
 package pt.paulinoo.dbotkt.di
 
-import io.github.cdimascio.dotenv.dotenv
 import pt.paulinoo.dbotkt.commands.CommandHandler
 import pt.paulinoo.dbotkt.commands.ServersCommand
 import pt.paulinoo.dbotkt.player.audio.AudioManager
@@ -32,7 +31,6 @@ import pt.paulinoo.dbotkt.player.commands.SwapCommand
 import pt.paulinoo.dbotkt.player.commands.VolumeCommand
 
 object ServiceLocator {
-    private val dotenv = dotenv()
     val audioManager: AudioManager by lazy { LavaAudioManager() }
     val commandHandler: CommandHandler by lazy {
         CommandHandler(
@@ -73,10 +71,10 @@ object ServiceLocator {
     val spotifyHandler by lazy {
         SpotifyHandler(
             clientId =
-                dotenv["SPOTIFY_CLIENT_ID"]
+                System.getenv("SPOTIFY_CLIENT_ID")
                     ?: throw IllegalArgumentException("Missing SPOTIFY_CLIENT_ID"),
             clientSecret =
-                dotenv["SPOTIFY_CLIENT_SECRET"]
+                System.getenv("SPOTIFY_CLIENT_SECRET")
                     ?: throw IllegalArgumentException("Missing SPOTIFY_CLIENT_SECRET"),
         )
     }

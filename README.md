@@ -25,14 +25,14 @@ A Kotlin Discord bot project using Lavaplayer for audio playback and Spotify int
 ## Setup
 
 1. **Clone the repository:**
-   ```
+   ```bash
    git clone https://github.com/antonio-paulino/DBotKt.git
    ```
-   ```
+   ```bash
    cd DBotKt
    ```
 
-2. **Configure environment variables `.env` file:**
+2. **Configure environment variables:**
     - `DISCORD_TOKEN`: Your Discord bot token
     - `SPOTIFY_CLIENT_ID`: Your Spotify client ID
     - `SPOTIFY_CLIENT_SECRET`: Your Spotify client secret
@@ -40,15 +40,63 @@ A Kotlin Discord bot project using Lavaplayer for audio playback and Spotify int
     - `PREFIXES`: Command prefixes for the bot separated by a space (e.g., `! ?`)
 
 3. **Build the project:**
-   ```
+   ```bash
    ./gradlew build
    ```
 
 4. **Run the bot:**
-   ```
+   ```bash
    java -jar ./DBotKt-<version>.jar
    ```
 
+## Docker
+
+You can also run the bot using Docker.  
+Make sure you have Docker installed.
+
+### Using Prebuilt Image
+
+1. **Run with Docker Compose:**  
+   Update the [docker-compose.yml](docker-compose.yml) file to use the prebuilt image:
+
+   ```yaml
+   services:
+     dbotkt:
+       container_name: DBotKT
+       restart: always
+       image: paulinoo/dbotkt:latest
+       environment:
+         - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+         - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+         - DISCORD_TOKEN=${DISCORD_TOKEN}
+         - YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN}
+         - PREFIXES=! .
+         - ADMIN_IDS=${ADMIN_IDS}
+   ```
+   Then start the container:
+
+   ```bash
+    docker compose up -d
+   ```
+
+2. **Or run with Docker CLI:**
+   ```bash
+   docker run -d \
+     --name DBotKT \
+     --restart always \
+     -e DISCORD_TOKEN=${DISCORD_TOKEN} \
+     -e SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID} \
+     -e SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET} \
+     -e YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN} \
+     -e PREFIXES="! ." \
+     paulinoo/dbotkt:latest
+   ```
+   If you want to build the image yourself, you can use the provided [Dockerfile](Dockerfile):
+   ```bash
+    docker build -t dbotkt .
+   ```
+   Make sure to set the environment variables as needed.
+    
 ## Usage
 
 - Use Discord commands to play tracks or playlists from supported sources.
@@ -77,4 +125,4 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 
 ## License
 
-See `LICENSE` for details.
+See [LICENSE](LICENSE) for details.

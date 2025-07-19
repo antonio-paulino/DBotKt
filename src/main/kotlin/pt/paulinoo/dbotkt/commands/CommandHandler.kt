@@ -1,19 +1,17 @@
 package pt.paulinoo.dbotkt.commands
 
-import io.github.cdimascio.dotenv.dotenv
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
 
 class CommandHandler(private val commands: List<Command>) {
     private val commandMap = commands.associateBy { it.name }
-    private val dotenv = dotenv()
 
     private val logger = LoggerFactory.getLogger(CommandHandler::class.java)
 
     suspend fun handle(event: MessageReceivedEvent) {
         val content = event.message.contentRaw
-        if (dotenv["PREFIXES"].split(" ").none { content.startsWith(it) }) return
+        if (System.getenv("PREFIXES").split(" ").none { content.startsWith(it) }) return
 
         val parts = content.substring(1).split("\\s+".toRegex())
         if (parts.isEmpty() || parts[0].isBlank()) return
