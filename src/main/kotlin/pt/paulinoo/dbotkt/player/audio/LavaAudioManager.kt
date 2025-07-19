@@ -277,6 +277,7 @@ class LavaAudioManager : AudioManager {
         val player = getOrCreatePlayer(guild, channel)
         player.player.stopTrack()
         PlayerMessageManager.removePlayerMessage(guild)
+        player.queue.clear()
         players.remove(guild.idLong)
         guild.audioManager.closeAudioConnection()
         logger.info("Stopped playback and cleared queue in guild ${guild.name}")
