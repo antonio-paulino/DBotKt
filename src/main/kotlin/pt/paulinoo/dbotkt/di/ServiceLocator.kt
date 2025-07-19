@@ -58,10 +58,10 @@ object ServiceLocator {
             ),
         )
     }
-    val slashCommandHandler : SlashCommandHandler by lazy {
+    val slashCommandHandler: SlashCommandHandler by lazy {
         SlashCommandHandler(
             listOf(
-                HelpSlashCommand()
+                HelpSlashCommand(),
             ),
         )
     }

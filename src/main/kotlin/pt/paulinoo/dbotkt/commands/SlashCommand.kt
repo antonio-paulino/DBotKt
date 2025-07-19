@@ -4,7 +4,9 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 
 interface SlashCommand {
-    val name : String
+    val name: String
+
     fun getCommandData(): SlashCommandData
+
     suspend fun execute(event: SlashCommandInteractionEvent)
 }

@@ -70,10 +70,12 @@ class DiscordBot() : CoroutineScope {
     init {
         registerCommands()
     }
+
     private fun registerCommands() {
         val commands = ServiceLocator.slashCommandHandler.commands
         jda.updateCommands().addCommands(commands.map { it.getCommandData() }).queue()
     }
+
     fun shutdown() {
         jda.shutdown()
         if (!jda.awaitShutdown(Duration.ofSeconds(10))) {

@@ -16,7 +16,8 @@ class HelpSlashCommand : SlashCommand {
     }
 
     override suspend fun execute(event: SlashCommandInteractionEvent) {
-        val helpMessage = """
+        val helpMessage =
+            """
             Here are the commands you can use:
             - `!play <song || youtube link || spotify link>`: Plays a song or playlist.
             - `!pause`: Pauses the current song.
@@ -32,13 +33,14 @@ class HelpSlashCommand : SlashCommand {
             - `!swap <index1> <index2>`: Swaps two songs in the queue.
             - `!remove <index>`: Removes a song from the queue by its index.
             - `!lyrics`: Displays the lyrics of the currently playing song.
-        """.trimIndent()
+            """.trimIndent()
 
-        val embed = Embed.create(
-            title = "Help Menu",
-            description = helpMessage,
-            level = EmbedLevel.INFO
-        ).build()
+        val embed =
+            Embed.create(
+                title = "Help Menu",
+                description = helpMessage,
+                level = EmbedLevel.INFO,
+            ).build()
 
         val deleteEmoji = Emoji.fromUnicode("U+274C")
 
