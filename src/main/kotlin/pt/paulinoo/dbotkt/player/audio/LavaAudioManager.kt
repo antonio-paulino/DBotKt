@@ -142,16 +142,12 @@ class LavaAudioManager : AudioManager {
                             it.delete().queueAfter(10, TimeUnit.SECONDS)
                         }
                     }
-                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                 }
 
                 override fun playlistLoaded(playlist: AudioPlaylist) {
                     playlist.tracks.forEach { it.userData = TrackMetadata(requesterId) }
                     val firstTrack = playlist.selectedTrack ?: playlist.tracks.firstOrNull()
                     if (firstTrack != null) {
-                        if (!player.player.startTrack(firstTrack, true)) {
-                            player.queue.add(firstTrack)
-                        }
                         if (queueAll) {
                             playlist.tracks.drop(1).forEach { player.queue.add(it) }
                             logger.info("Playlist loaded: ${playlist.name}, queue size is now ${player.queue.size + 1}")
@@ -189,8 +185,12 @@ class LavaAudioManager : AudioManager {
                                 }
                             }
                         }
+                        if (player.player.startTrack(firstTrack, true)){
+                            player.queue.remove(firstTrack)
+                        } else {
+                            player.queue.add(firstTrack)
+                        }
                     }
-                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                 }
 
                 override fun noMatches() {
@@ -220,7 +220,6 @@ class LavaAudioManager : AudioManager {
         requesterId: Long,
     ) {
         loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = false)
-        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
     override fun loadAndPlaySpotifyPlaylist(
@@ -232,7 +231,6 @@ class LavaAudioManager : AudioManager {
         songsMetadata.forEach { song ->
             val trackUrl = "ytsearch:$song"
             loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = false)
-            PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
         }
     }
 
@@ -240,7 +238,7 @@ class LavaAudioManager : AudioManager {
         channel: MessageChannel,
         guild: Guild,
     ) {
-        getOrCreatePlayer(guild, channel).isPaused = true
+        getOrCreatePlayer(guild, channel).player.isPaused = true
         logger.info("Paused playback in guild ${guild.name}")
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
@@ -249,7 +247,7 @@ class LavaAudioManager : AudioManager {
         channel: MessageChannel,
         guild: Guild,
     ) {
-        val player = getOrCreatePlayer(guild, channel)
+        val player = getOrCreatePlayer(guild, channel).player
         player.isPaused = !player.isPaused
         logger.info(
             if (player.isPaused) {
@@ -267,7 +265,7 @@ class LavaAudioManager : AudioManager {
         channel: MessageChannel,
         guild: Guild,
     ) {
-        getOrCreatePlayer(guild, channel).isPaused = false
+        getOrCreatePlayer(guild, channel).player.isPaused = false
         logger.info("Resumed playback in guild ${guild.name}")
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }

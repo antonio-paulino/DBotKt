@@ -8,7 +8,8 @@ class GuildAudioPlayer(
 ) {
     var queue: ArrayDeque<AudioTrack> = ArrayDeque()
 
-    var isPaused: Boolean = false
+    val isPaused: Boolean
+        get() = player.isPaused
 
     var isLooping: Boolean = false
 
