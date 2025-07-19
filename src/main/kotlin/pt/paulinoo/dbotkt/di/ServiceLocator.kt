@@ -17,6 +17,7 @@ import pt.paulinoo.dbotkt.player.buttons.StopButton
 import pt.paulinoo.dbotkt.player.buttons.VolumeDownButton
 import pt.paulinoo.dbotkt.player.buttons.VolumeUpButton
 import pt.paulinoo.dbotkt.player.commands.ClearQueueCommand
+import pt.paulinoo.dbotkt.player.commands.LyricsCommand
 import pt.paulinoo.dbotkt.player.commands.PauseCommand
 import pt.paulinoo.dbotkt.player.commands.PlayCommand
 import pt.paulinoo.dbotkt.player.commands.QueueCommand
@@ -50,6 +51,7 @@ object ServiceLocator {
                 VolumeCommand(audioManager),
                 QueueCommand(audioManager),
                 ClearQueueCommand(audioManager),
+                LyricsCommand(audioManager),
                 ServersCommand(),
             ),
         )
