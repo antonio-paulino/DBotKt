@@ -1,8 +1,13 @@
 package pt.paulinoo.dbotkt.player.commands
 
+import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.interactions.components.buttons.Button
 import pt.paulinoo.dbotkt.commands.Command
+import pt.paulinoo.dbotkt.embed.Embed
+import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
+import java.util.concurrent.TimeUnit
 
 class LyricsCommand(
     private val audioCommandManager: AudioManager,
@@ -13,6 +18,48 @@ class LyricsCommand(
         event: MessageReceivedEvent,
         args: List<String>,
     ) {
-        TODO("Implement lyrics command functionality")
+        val guild = event.guild
+
+        val audioPlayer = audioCommandManager.getGuildPlayer(guild)
+        if (audioPlayer == null) {
+            val embed =
+                Embed.create(
+                    EmbedLevel.ERROR,
+                    "Not connected to a voice channel.",
+                ).build()
+            event.channel.sendMessageEmbeds(embed).queue { message ->
+                message.delete().queueAfter(10, TimeUnit.SECONDS)
+            }
+            return
+        }
+
+        val lyrics = audioCommandManager.getLyrics(channel = event.channel, guild = guild)
+
+        if (lyrics == null) {
+            val embed =
+                Embed.create(
+                    EmbedLevel.ERROR,
+                    "No lyrics found for the current track.",
+                ).build()
+            event.channel.sendMessageEmbeds(embed).queue { message ->
+                message.delete().queueAfter(10, TimeUnit.SECONDS)
+            }
+            return
+        }
+        val embed =
+            Embed.create(
+                EmbedLevel.INFO,
+                "Lyrics for current track:",
+                lyrics,
+            ).build()
+
+        val deleteEmoji = Emoji.fromUnicode("U+274C")
+
+        event.channel.sendMessageEmbeds(embed).setActionRow(
+            Button.secondary(
+                "lyrics_button_delete",
+                deleteEmoji,
+            ),
+        ).queue()
     }
 }

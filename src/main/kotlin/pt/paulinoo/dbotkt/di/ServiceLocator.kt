@@ -8,6 +8,7 @@ import pt.paulinoo.dbotkt.player.audio.SpotifyHandler
 import pt.paulinoo.dbotkt.player.buttons.ButtonHandler
 import pt.paulinoo.dbotkt.player.buttons.ClearQueueButton
 import pt.paulinoo.dbotkt.player.buttons.LoopButton
+import pt.paulinoo.dbotkt.player.buttons.LyricsButton
 import pt.paulinoo.dbotkt.player.buttons.PauseResumeButton
 import pt.paulinoo.dbotkt.player.buttons.QueueButton
 import pt.paulinoo.dbotkt.player.buttons.ShuffleButton
@@ -65,6 +66,7 @@ object ServiceLocator {
                 LoopButton(audioManager),
                 QueueButton(audioManager),
                 ShuffleButton(audioManager),
+                LyricsButton(audioManager),
             ),
         )
     }

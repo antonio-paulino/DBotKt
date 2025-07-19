@@ -48,7 +48,7 @@ class QueueCommand(
             buildList {
                 if (currentPage > 1) add(Button.secondary("queue_prev:$guildId:$currentPage", leftEmoji))
                 if (currentPage < totalPages) add(Button.secondary("queue_next:$guildId:$currentPage", rightEmoji))
-                add(Button.danger("queue_delete:$guildId:$currentPage", deleteEmoji))
+                add(Button.secondary("queue_delete:$guildId:$currentPage", deleteEmoji))
             }
 
         channel.sendMessageEmbeds(embed)

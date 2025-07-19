@@ -3,6 +3,7 @@ package pt.paulinoo.dbotkt.player.audio
 import com.github.topi314.lavasearch.SearchManager
 import com.github.topi314.lavasrc.mirror.DefaultMirroringAudioTrackResolver
 import com.github.topi314.lavasrc.spotify.SpotifySourceManager
+import com.github.topi314.lavasrc.ytdlp.YtdlpAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats
 import com.sedmelluq.discord.lavaplayer.player.AudioConfiguration
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
@@ -11,16 +12,13 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import dev.lavalink.youtube.YoutubeAudioSourceManager
-import dev.lavalink.youtube.clients.MWebWithThumbnail
-import dev.lavalink.youtube.clients.TvHtml5Embedded
-import dev.lavalink.youtube.clients.WebWithThumbnail
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import org.slf4j.LoggerFactory
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.embed.PlayerMessageManager
+import pt.paulinoo.dbotkt.player.lyrics.LyricsSource
 import java.util.concurrent.TimeUnit
 
 class LavaAudioManager : AudioManager {
@@ -46,19 +44,19 @@ class LavaAudioManager : AudioManager {
                 mirroringResolver,
             )
         playerManager.registerSourceManager(spotifySourceManager)
+        /*
+                val youtubeSourceManager =
+                    YoutubeAudioSourceManager(
+                        TvHtml5Embedded(),
+                        WebWithThumbnail(),
+                        MWebWithThumbnail(),
+                    )
+                youtubeSourceManager.useOauth2(System.getenv("YT_REFRESH_TOKEN"), true)
+                playerManager.registerSourceManager(youtubeSourceManager)
+         */
 
-        val youtubeSourceManager =
-            YoutubeAudioSourceManager(
-                TvHtml5Embedded(),
-                WebWithThumbnail(),
-                MWebWithThumbnail(),
-            )
-        youtubeSourceManager.useOauth2(System.getenv("YT_REFRESH_TOKEN"), true)
-        playerManager.registerSourceManager(youtubeSourceManager)
-
-        // Uncomment if yt-dlp support is needed
-        // val ytdlManager = YtdlpAudioSourceManager("/usr/local/bin/yt-dlp")
-        // playerManager.registerSourceManager(ytdlManager)
+        val ytdlManager = YtdlpAudioSourceManager("/usr/local/bin/yt-dlp")
+        playerManager.registerSourceManager(ytdlManager)
 
         AudioSourceManagers.registerLocalSource(playerManager)
 
@@ -427,6 +425,24 @@ class LavaAudioManager : AudioManager {
         player.queue.clear()
         logger.info("Cleared the queue in guild ${guild.name}")
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
+    }
+
+    override fun getLyrics(
+        channel: MessageChannel,
+        guild: Guild,
+    ): String? {
+        val player = getOrCreatePlayer(guild, channel)
+        val currentTrack = player.player.playingTrack ?: return null
+
+        val lyricsSource = LyricsSource()
+        val lyrics =
+            lyricsSource.fetchLyrics(
+                currentTrack.info.title,
+                currentTrack.info.author,
+                currentTrack.info.length,
+            )
+
+        return lyrics
     }
 
     override fun getLavaPlayerStats(): String {

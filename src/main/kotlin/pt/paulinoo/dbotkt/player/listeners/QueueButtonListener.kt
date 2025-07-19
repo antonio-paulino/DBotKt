@@ -1,4 +1,4 @@
-package pt.paulinoo.dbotkt.player.embed
+package pt.paulinoo.dbotkt.player.listeners
 
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
+import pt.paulinoo.dbotkt.player.embed.PlayerEmbed
 import java.util.concurrent.TimeUnit
 
 class QueueButtonListener(

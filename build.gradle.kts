@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "pt.paulinoo"
-version = "0.2"
+version = "1.0.0"
 
 repositories {
     mavenCentral()

@@ -99,5 +99,10 @@ interface AudioManager {
         guild: Guild,
     )
 
+    fun getLyrics(
+        channel: MessageChannel,
+        guild: Guild,
+    ): String?
+
     fun isPaused(guild: Guild): Boolean
 }

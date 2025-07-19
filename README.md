@@ -3,7 +3,6 @@
 A Kotlin Discord bot project using Lavaplayer for audio playback and Spotify integration.
 
 ## TODO
-- [ ] Finish implementing lyrics command and it's button.
 - [ ] Make the bot more configurable via environment variables.
 - [ ] Improve error handling and logging.
 
@@ -69,7 +68,6 @@ Make sure you have Docker installed.
          - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
          - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
          - DISCORD_TOKEN=${DISCORD_TOKEN}
-         - YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN}
          - PREFIXES=! .
          - ADMIN_IDS=${ADMIN_IDS}
    ```
@@ -122,6 +120,7 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 - [Lavasrc](https://github.com/topi314/LavaSrc)
 - [Youtube-source](https://github.com/lavalink-devs/youtube-source)
 - [udpqueue](https://github.com/MinnDevelopment/udpqueue.rs)
+- [lrclib](https://github.com/tranxuanthang/lrclib)
 
 ## License
 

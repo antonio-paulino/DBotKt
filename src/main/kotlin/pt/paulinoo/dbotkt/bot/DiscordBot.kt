@@ -14,7 +14,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.requests.GatewayIntent
 import pt.paulinoo.dbotkt.di.ServiceLocator
 import pt.paulinoo.dbotkt.di.ServiceLocator.audioManager
-import pt.paulinoo.dbotkt.player.embed.QueueButtonListener
+import pt.paulinoo.dbotkt.player.listeners.LyricsButtonListener
+import pt.paulinoo.dbotkt.player.listeners.QueueButtonListener
 import java.time.Duration
 
 class DiscordBot() : CoroutineScope {
@@ -50,6 +51,7 @@ class DiscordBot() : CoroutineScope {
                     }
                 },
                 QueueButtonListener(audioManager),
+                LyricsButtonListener(audioManager),
             )
             .setAudioSendFactory(NativeAudioSendFactory())
             .setActivity(Activity.listening("!help"))
