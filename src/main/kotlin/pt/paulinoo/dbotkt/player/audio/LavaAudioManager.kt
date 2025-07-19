@@ -335,13 +335,13 @@ class LavaAudioManager : AudioManager {
     ) {
         val queue = players[guild.idLong]?.queue ?: return
 
-        if (first !in 0 until queue.size || second !in 0 until queue.size) {
+        if (first !in 1 until queue.size || second !in 1 until queue.size) {
             logger.warn("Invalid track indices: $first, $second in guild ${guild.name}")
             return
         }
 
-        val tmp = queue[first]
-        queue[first] = queue[second]
+        val tmp = queue[first - 1]
+        queue[first - 1] = queue[second - 1]
         queue[second] = tmp
 
         logger.info("Swapped tracks at indices $first and $second in guild ${guild.name}")
