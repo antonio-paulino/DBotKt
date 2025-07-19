@@ -8,13 +8,14 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.requests.GatewayIntent
 import pt.paulinoo.dbotkt.di.ServiceLocator
 import pt.paulinoo.dbotkt.di.ServiceLocator.audioManager
-import pt.paulinoo.dbotkt.player.listeners.LyricsButtonListener
+import pt.paulinoo.dbotkt.player.listeners.ButtonListener
 import pt.paulinoo.dbotkt.player.listeners.QueueButtonListener
 import pt.paulinoo.dbotkt.player.listeners.VoiceChannelEmptyListener
 import java.time.Duration
@@ -50,16 +51,29 @@ class DiscordBot() : CoroutineScope {
                             ServiceLocator.buttonHandler.handle(event)
                         }
                     }
+
+                    override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
+                        launch {
+                            ServiceLocator.slashCommandHandler.handle(event)
+                        }
+                    }
                 },
                 QueueButtonListener(audioManager),
-                LyricsButtonListener(audioManager),
+                ButtonListener(audioManager),
                 VoiceChannelEmptyListener(audioManager),
             )
             .setAudioSendFactory(NativeAudioSendFactory())
-            .setActivity(Activity.listening("!help"))
+            .setActivity(Activity.listening("/help"))
             .build()
             .awaitReady()
 
+    init {
+        registerCommands()
+    }
+    private fun registerCommands() {
+        val commands = ServiceLocator.slashCommandHandler.commands
+        jda.updateCommands().addCommands(commands.map { it.getCommandData() }).queue()
+    }
     fun shutdown() {
         jda.shutdown()
         if (!jda.awaitShutdown(Duration.ofSeconds(10))) {

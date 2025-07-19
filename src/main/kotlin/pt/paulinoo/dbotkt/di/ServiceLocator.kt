@@ -1,7 +1,9 @@
 package pt.paulinoo.dbotkt.di
 
 import pt.paulinoo.dbotkt.commands.CommandHandler
+import pt.paulinoo.dbotkt.commands.HelpSlashCommand
 import pt.paulinoo.dbotkt.commands.ServersCommand
+import pt.paulinoo.dbotkt.commands.SlashCommandHandler
 import pt.paulinoo.dbotkt.player.audio.AudioManager
 import pt.paulinoo.dbotkt.player.audio.LavaAudioManager
 import pt.paulinoo.dbotkt.player.audio.SpotifyHandler
@@ -53,6 +55,13 @@ object ServiceLocator {
                 ClearQueueCommand(audioManager),
                 LyricsCommand(audioManager),
                 ServersCommand(),
+            ),
+        )
+    }
+    val slashCommandHandler : SlashCommandHandler by lazy {
+        SlashCommandHandler(
+            listOf(
+                HelpSlashCommand()
             ),
         )
     }

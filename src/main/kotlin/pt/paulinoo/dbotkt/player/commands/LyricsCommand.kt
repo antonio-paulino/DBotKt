@@ -57,7 +57,7 @@ class LyricsCommand(
 
         event.channel.sendMessageEmbeds(embed).setActionRow(
             Button.secondary(
-                "lyrics_button_delete",
+                "button_delete",
                 deleteEmoji,
             ),
         ).queue()
