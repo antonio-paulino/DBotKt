@@ -17,7 +17,12 @@ class PlayCommand(
         event: MessageReceivedEvent,
         args: List<String>,
     ) {
-        val query = args.joinToString(" ").takeIf { it.isNotBlank() } ?: return
+        val filteredArgs = args.dropWhile { it.equals("play", ignoreCase = true) }
+        val query =
+            filteredArgs.joinToString(" ").takeIf { it.isNotBlank() }?.let {
+                val urlRegex = Regex("""https?://\S+""")
+                urlRegex.find(it)?.value ?: it
+            } ?: return
         val guild = event.guild
         val member = event.member ?: return
         val voiceChannel = member.voiceState?.channel

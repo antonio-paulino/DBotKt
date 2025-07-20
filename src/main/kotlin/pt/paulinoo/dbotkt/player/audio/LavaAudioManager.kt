@@ -196,10 +196,30 @@ class LavaAudioManager : AudioManager {
 
                 override fun noMatches() {
                     logger.warn("No matches found for $trackUrl")
+                    val embed =
+                        Embed.create(
+                            EmbedLevel.ERROR,
+                            "No Matches Found",
+                            "No matches found for the provided URL: $trackUrl",
+                        ).build()
+                    channel.sendMessageEmbeds(embed).queue {
+                        it.delete().queueAfter(10, TimeUnit.SECONDS)
+                        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
+                    }
                 }
 
                 override fun loadFailed(exception: FriendlyException) {
                     logger.error("Track load failed", exception)
+                    val embed =
+                        Embed.create(
+                            EmbedLevel.ERROR,
+                            "Track Load Failed",
+                            "Failed to load track: ${exception.message}",
+                        ).build()
+                    channel.sendMessageEmbeds(embed).queue {
+                        it.delete().queueAfter(10, TimeUnit.SECONDS)
+                        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
+                    }
                 }
             },
         )
