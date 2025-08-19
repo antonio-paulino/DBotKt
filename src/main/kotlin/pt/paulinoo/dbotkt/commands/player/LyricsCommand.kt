@@ -1,27 +1,31 @@
-package pt.paulinoo.dbotkt.player.commands
+package pt.paulinoo.dbotkt.commands.player
 
+import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.interactions.components.buttons.Button
 import pt.paulinoo.dbotkt.commands.Command
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
 import java.util.concurrent.TimeUnit
 
-class RemoveCommand(
+class LyricsCommand(
     private val audioCommandManager: AudioManager,
 ) : Command {
-    override val name: String = "remove"
+    override val name: String = "lyrics"
 
     override suspend fun execute(
         event: MessageReceivedEvent,
         args: List<String>,
     ) {
-        if (args.isEmpty()) {
+        val guild = event.guild
+
+        val audioPlayer = audioCommandManager.getGuildPlayer(guild)
+        if (audioPlayer == null) {
             val embed =
                 Embed.create(
-                    title = "Remove Command",
-                    description = "Usage: `${event.guild.selfMember.effectiveName} remove <song index>`",
-                    level = EmbedLevel.WARNING,
+                    EmbedLevel.ERROR,
+                    "Not connected to a voice channel.",
                 ).build()
             event.channel.sendMessageEmbeds(embed).queue { message ->
                 message.delete().queueAfter(10, TimeUnit.SECONDS)
@@ -29,30 +33,33 @@ class RemoveCommand(
             return
         }
 
-        val index = args[0].toIntOrNull()
-        if (index == null || index < 1) {
+        val lyrics = audioCommandManager.getLyrics(channel = event.channel, guild = guild)
+
+        if (lyrics == null) {
             val embed =
                 Embed.create(
-                    title = "Invalid Index",
-                    description = "Please provide a valid song index.",
-                    level = EmbedLevel.ERROR,
+                    EmbedLevel.ERROR,
+                    "No lyrics found for the current track.",
                 ).build()
             event.channel.sendMessageEmbeds(embed).queue { message ->
                 message.delete().queueAfter(10, TimeUnit.SECONDS)
             }
             return
         }
-        val textChannel = event.channel
-
-        audioCommandManager.remove(textChannel, event.guild, index - 1)
         val embed =
             Embed.create(
-                title = "Song Removed",
-                description = "Song at index $index has been removed from the queue.",
-                level = EmbedLevel.INFO,
+                EmbedLevel.INFO,
+                "Lyrics for current track:",
+                lyrics,
             ).build()
-        event.channel.sendMessageEmbeds(embed).queue { message ->
-            message.delete().queueAfter(10, TimeUnit.SECONDS)
-        }
+
+        val deleteEmoji = Emoji.fromUnicode("U+274C")
+
+        event.channel.sendMessageEmbeds(embed).setActionRow(
+            Button.secondary(
+                "button_delete",
+                deleteEmoji,
+            ),
+        ).queue()
     }
 }

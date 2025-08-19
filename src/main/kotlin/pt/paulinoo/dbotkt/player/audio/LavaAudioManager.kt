@@ -3,7 +3,6 @@ package pt.paulinoo.dbotkt.player.audio
 import com.github.topi314.lavasearch.SearchManager
 import com.github.topi314.lavasrc.mirror.DefaultMirroringAudioTrackResolver
 import com.github.topi314.lavasrc.spotify.SpotifySourceManager
-import com.github.topi314.lavasrc.ytdlp.YtdlpAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats
 import com.sedmelluq.discord.lavaplayer.player.AudioConfiguration
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
@@ -12,6 +11,10 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import dev.lavalink.youtube.YoutubeAudioSourceManager
+import dev.lavalink.youtube.clients.MWebWithThumbnail
+import dev.lavalink.youtube.clients.TvHtml5Embedded
+import dev.lavalink.youtube.clients.WebWithThumbnail
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import org.slf4j.LoggerFactory
@@ -44,7 +47,7 @@ class LavaAudioManager : AudioManager {
                 mirroringResolver,
             )
         playerManager.registerSourceManager(spotifySourceManager)
-        /*
+
                 val youtubeSourceManager =
                     YoutubeAudioSourceManager(
                         TvHtml5Embedded(),
@@ -53,10 +56,9 @@ class LavaAudioManager : AudioManager {
                     )
                 youtubeSourceManager.useOauth2(System.getenv("YT_REFRESH_TOKEN"), true)
                 playerManager.registerSourceManager(youtubeSourceManager)
-         */
 
-        val ytdlManager = YtdlpAudioSourceManager("/usr/local/bin/yt-dlp")
-        playerManager.registerSourceManager(ytdlManager)
+        // val ytdlManager = YtdlpAudioSourceManager("C:\\Users\\anton\\Documents\\ytdlp\\yt-dlp.exe")
+        // playerManager.registerSourceManager(ytdlManager)
 
         AudioSourceManagers.registerLocalSource(playerManager)
 
@@ -74,28 +76,6 @@ class LavaAudioManager : AudioManager {
     ): GuildAudioPlayer =
         players.computeIfAbsent(guild.idLong) {
             val player = GuildAudioPlayer(playerManager.createPlayer())
-//            player.setFilterFactory { track, format, output ->
-//                val equalizer = Equalizer(format.channelCount, output)
-//
-//                equalizer.setGain(0, 0.05f) // Sub-bass (~60 Hz)
-//                equalizer.setGain(1, 0.08f) // Bass (~90 Hz)
-//                equalizer.setGain(2, 0.04f) // Low-mid (~120 Hz)
-//
-//                equalizer.setGain(3, 0.0f)
-//                equalizer.setGain(4, -0.02f)
-//                equalizer.setGain(5, -0.03f)
-//                equalizer.setGain(6, -0.03f)
-//                equalizer.setGain(7, -0.04f)
-//                equalizer.setGain(8, -0.02f)
-//                equalizer.setGain(9, 0.0f)
-//                equalizer.setGain(10, 0.0f)
-//                equalizer.setGain(11, 0.0f)
-//                equalizer.setGain(12, 0.0f)
-//                equalizer.setGain(13, 0.0f)
-//                equalizer.setGain(14, 0.0f)
-//
-//                listOf(equalizer)
-//            }
             player.player.addListener(TrackScheduler(player.queue, guild, channel, this))
             guild.audioManager.sendingHandler = LavaPlayerAudioSendHandler(player.player)
             player

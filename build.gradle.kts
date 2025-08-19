@@ -24,14 +24,14 @@ dependencies {
     implementation("club.minnced:udpqueue-native-win-x86-64:0.2.9")
     implementation("club.minnced:udpqueue-native-win-x86:0.2.9")
     implementation("club.minnced:udpqueue-native-darwin:0.2.9")
-    implementation("com.github.topi314.lavasrc:lavasrc:dbda8e7")
-    implementation("com.github.topi314.lavasrc:lavasrc-protocol:4.7.2")
+    implementation("com.github.topi314.lavasrc:lavasrc:4.8.0")
+    implementation("com.github.topi314.lavasrc:lavasrc-protocol:4.8.0")
     implementation("dev.arbjerg:lavaplayer:2.2.4")
-    implementation("dev.lavalink.youtube:v2:1.13.3")
+    implementation("dev.lavalink.youtube:v2:1.13.4")
     implementation("net.dv8tion:JDA:5.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("org.slf4j:slf4j-simple:2.0.17")
-    implementation("se.michaelthelin.spotify:spotify-web-api-java:9.2.0")
+    implementation("se.michaelthelin.spotify:spotify-web-api-java:9.3.0")
     testImplementation(kotlin("test"))
 }
 

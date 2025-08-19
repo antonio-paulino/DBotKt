@@ -1,4 +1,4 @@
-package pt.paulinoo.dbotkt.player.commands
+package pt.paulinoo.dbotkt.commands.player
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import pt.paulinoo.dbotkt.commands.Command
@@ -7,10 +7,10 @@ import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
 import java.util.concurrent.TimeUnit
 
-class ResumeCommand(
+class PauseCommand(
     private val audioCommandManager: AudioManager,
 ) : Command {
-    override val name: String = "resume"
+    override val name: String = "pause"
 
     override suspend fun execute(
         event: MessageReceivedEvent,
@@ -21,22 +21,22 @@ class ResumeCommand(
         val textChannel = event.channel
 
         if (audioManager.isConnected) {
-            audioCommandManager.resume(textChannel, guild)
+            audioCommandManager.pause(textChannel, guild)
             val embed =
                 Embed.create(
-                    description = "Playback resumed.",
-                    level = EmbedLevel.INFO,
+                    EmbedLevel.INFO,
+                    "Playback paused.",
                 ).build()
-            textChannel.sendMessageEmbeds(embed).queue { message ->
+            event.channel.sendMessageEmbeds(embed).queue { message ->
                 message.delete().queueAfter(10, TimeUnit.SECONDS)
             }
         } else {
             val embed =
                 Embed.create(
-                    description = "Not connected to a voice channel.",
-                    level = EmbedLevel.WARNING,
+                    EmbedLevel.ERROR,
+                    "Not connected to a voice channel.",
                 ).build()
-            textChannel.sendMessageEmbeds(embed).queue { message ->
+            event.channel.sendMessageEmbeds(embed).queue { message ->
                 message.delete().queueAfter(10, TimeUnit.SECONDS)
             }
         }

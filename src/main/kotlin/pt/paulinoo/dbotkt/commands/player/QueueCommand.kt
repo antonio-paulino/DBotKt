@@ -1,4 +1,4 @@
-package pt.paulinoo.dbotkt.player.commands
+package pt.paulinoo.dbotkt.commands.player
 
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent

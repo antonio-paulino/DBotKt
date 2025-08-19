@@ -1,4 +1,4 @@
-package pt.paulinoo.dbotkt.commands
+package pt.paulinoo.dbotkt.commands.slash
 
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
