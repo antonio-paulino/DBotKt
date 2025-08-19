@@ -48,14 +48,14 @@ class LavaAudioManager : AudioManager {
             )
         playerManager.registerSourceManager(spotifySourceManager)
 
-                val youtubeSourceManager =
-                    YoutubeAudioSourceManager(
-                        TvHtml5Embedded(),
-                        WebWithThumbnail(),
-                        MWebWithThumbnail(),
-                    )
-                youtubeSourceManager.useOauth2(System.getenv("YT_REFRESH_TOKEN"), true)
-                playerManager.registerSourceManager(youtubeSourceManager)
+        val youtubeSourceManager =
+            YoutubeAudioSourceManager(
+                TvHtml5Embedded(),
+                WebWithThumbnail(),
+                MWebWithThumbnail(),
+            )
+        youtubeSourceManager.useOauth2(System.getenv("YT_REFRESH_TOKEN"), true)
+        playerManager.registerSourceManager(youtubeSourceManager)
 
         // val ytdlManager = YtdlpAudioSourceManager("C:\\Users\\anton\\Documents\\ytdlp\\yt-dlp.exe")
         // playerManager.registerSourceManager(ytdlManager)

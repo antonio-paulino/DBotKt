@@ -1,23 +1,7 @@
 package pt.paulinoo.dbotkt.di
 
 import pt.paulinoo.dbotkt.commands.CommandHandler
-import pt.paulinoo.dbotkt.commands.slash.HelpSlashCommand
 import pt.paulinoo.dbotkt.commands.ServersCommand
-import pt.paulinoo.dbotkt.commands.slash.SlashCommandHandler
-import pt.paulinoo.dbotkt.player.audio.AudioManager
-import pt.paulinoo.dbotkt.player.audio.LavaAudioManager
-import pt.paulinoo.dbotkt.player.audio.SpotifyHandler
-import pt.paulinoo.dbotkt.player.buttons.ButtonHandler
-import pt.paulinoo.dbotkt.player.buttons.ClearQueueButton
-import pt.paulinoo.dbotkt.player.buttons.LoopButton
-import pt.paulinoo.dbotkt.player.buttons.LyricsButton
-import pt.paulinoo.dbotkt.player.buttons.PauseResumeButton
-import pt.paulinoo.dbotkt.player.buttons.QueueButton
-import pt.paulinoo.dbotkt.player.buttons.ShuffleButton
-import pt.paulinoo.dbotkt.player.buttons.SkipButton
-import pt.paulinoo.dbotkt.player.buttons.StopButton
-import pt.paulinoo.dbotkt.player.buttons.VolumeDownButton
-import pt.paulinoo.dbotkt.player.buttons.VolumeUpButton
 import pt.paulinoo.dbotkt.commands.player.ClearQueueCommand
 import pt.paulinoo.dbotkt.commands.player.LyricsCommand
 import pt.paulinoo.dbotkt.commands.player.PauseCommand
@@ -33,6 +17,22 @@ import pt.paulinoo.dbotkt.commands.player.StatsCommand
 import pt.paulinoo.dbotkt.commands.player.StopCommand
 import pt.paulinoo.dbotkt.commands.player.SwapCommand
 import pt.paulinoo.dbotkt.commands.player.VolumeCommand
+import pt.paulinoo.dbotkt.commands.slash.HelpSlashCommand
+import pt.paulinoo.dbotkt.commands.slash.SlashCommandHandler
+import pt.paulinoo.dbotkt.player.audio.AudioManager
+import pt.paulinoo.dbotkt.player.audio.LavaAudioManager
+import pt.paulinoo.dbotkt.player.audio.SpotifyHandler
+import pt.paulinoo.dbotkt.player.buttons.ButtonHandler
+import pt.paulinoo.dbotkt.player.buttons.ClearQueueButton
+import pt.paulinoo.dbotkt.player.buttons.LoopButton
+import pt.paulinoo.dbotkt.player.buttons.LyricsButton
+import pt.paulinoo.dbotkt.player.buttons.PauseResumeButton
+import pt.paulinoo.dbotkt.player.buttons.QueueButton
+import pt.paulinoo.dbotkt.player.buttons.ShuffleButton
+import pt.paulinoo.dbotkt.player.buttons.SkipButton
+import pt.paulinoo.dbotkt.player.buttons.StopButton
+import pt.paulinoo.dbotkt.player.buttons.VolumeDownButton
+import pt.paulinoo.dbotkt.player.buttons.VolumeUpButton
 
 object ServiceLocator {
     val audioManager: AudioManager by lazy { LavaAudioManager() }
