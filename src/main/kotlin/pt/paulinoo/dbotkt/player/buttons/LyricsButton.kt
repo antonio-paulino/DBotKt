@@ -36,7 +36,7 @@ class LyricsButton(private val audioManager: AudioManager) : CustomButton {
             Embed.create(
                 EmbedLevel.INFO,
                 "Lyrics for current track:",
-                lyrics,
+                lyrics.text,
             ).build()
 
         val deleteEmoji = Emoji.fromUnicode("U+274C")

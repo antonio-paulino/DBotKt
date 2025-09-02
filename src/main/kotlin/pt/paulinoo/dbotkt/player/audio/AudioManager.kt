@@ -1,5 +1,6 @@
 package pt.paulinoo.dbotkt.player.audio
 
+import com.github.topi314.lavalyrics.lyrics.AudioLyrics
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 
@@ -102,7 +103,7 @@ interface AudioManager {
     fun getLyrics(
         channel: MessageChannel,
         guild: Guild,
-    ): String?
+    ): AudioLyrics?
 
     fun isPaused(guild: Guild): Boolean
 }

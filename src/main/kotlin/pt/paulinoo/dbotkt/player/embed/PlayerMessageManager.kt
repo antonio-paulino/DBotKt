@@ -18,27 +18,33 @@ object PlayerMessageManager {
         val embed = PlayerEmbed.createPlayerEmbed(guild, audioManager)
         val buttons = PlayerEmbed.createPlayerButtons()
 
-        val existingMessage = playerMessages[guild.idLong]
+        synchronized(playerMessages) {
+            val existingMessage = playerMessages[guild.idLong]
 
-        if (existingMessage != null) {
-            existingMessage.editMessageEmbeds(embed)
-                .setComponents(*buttons)
-                .queue()
-        } else {
-            val message =
-                MessageCreateBuilder()
-                    .setEmbeds(embed)
+            if (existingMessage != null) {
+                existingMessage.editMessageEmbeds(embed)
                     .setComponents(*buttons)
-                    .build()
+                    .queue()
+            } else {
+                val message =
+                    MessageCreateBuilder()
+                        .setEmbeds(embed)
+                        .setComponents(*buttons)
+                        .build()
 
-            channel.sendMessage(message).queue {
-                playerMessages[guild.idLong] = it
+                channel.sendMessage(message).queue {
+                    synchronized(playerMessages) {
+                        playerMessages[guild.idLong] = it
+                    }
+                }
             }
         }
     }
 
     fun removePlayerMessage(guild: Guild) {
-        val message = playerMessages.remove(guild.idLong)
-        message?.delete()?.queue()
+        synchronized(playerMessages) {
+            val message = playerMessages.remove(guild.idLong)
+            message?.delete()?.queue()
+        }
     }
 }

@@ -1,10 +1,9 @@
-FROM openjdk:21-jdk-slim-buster
+FROM ubuntu:22.04
 
 WORKDIR /app
 
-# Install Python3 and pip
 RUN apt-get update && \
-    apt-get install -y curl && \
+    apt-get install -y openjdk-21-jdk curl && \
     rm -rf /var/lib/apt/lists/*
 
 RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux -o /usr/local/bin/yt-dlp && \
@@ -13,8 +12,6 @@ RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_lin
 COPY --from=mwader/static-ffmpeg:7.1 /ffmpeg /usr/local/bin/
 COPY --from=mwader/static-ffmpeg:7.1 /ffprobe /usr/local/bin/
 
-# Copy your jar file into the container
 COPY DBotKt.jar .
 
-# Run the jar file
 CMD ["java", "-jar", "DBotKt.jar"]

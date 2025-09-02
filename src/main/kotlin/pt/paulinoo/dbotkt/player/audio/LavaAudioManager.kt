@@ -1,8 +1,12 @@
 package pt.paulinoo.dbotkt.player.audio
 
+import com.github.topi314.lavalyrics.LyricsManager
+import com.github.topi314.lavalyrics.lyrics.AudioLyrics
 import com.github.topi314.lavasearch.SearchManager
+import com.github.topi314.lavasrc.lrclib.LrcLibLyricsManager
 import com.github.topi314.lavasrc.mirror.DefaultMirroringAudioTrackResolver
 import com.github.topi314.lavasrc.spotify.SpotifySourceManager
+import com.github.topi314.lavasrc.ytdlp.YtdlpAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats
 import com.sedmelluq.discord.lavaplayer.player.AudioConfiguration
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
@@ -11,17 +15,12 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import dev.lavalink.youtube.YoutubeAudioSourceManager
-import dev.lavalink.youtube.clients.MWebWithThumbnail
-import dev.lavalink.youtube.clients.TvHtml5Embedded
-import dev.lavalink.youtube.clients.WebWithThumbnail
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import org.slf4j.LoggerFactory
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.embed.PlayerMessageManager
-import pt.paulinoo.dbotkt.player.lyrics.LyricsSource
 import java.util.concurrent.TimeUnit
 
 class LavaAudioManager : AudioManager {
@@ -32,6 +31,8 @@ class LavaAudioManager : AudioManager {
     val playerManager = DefaultAudioPlayerManager()
 
     val searchManager = SearchManager()
+
+    val lyricsManager = LyricsManager()
 
     init {
         val mirroringResolver = DefaultMirroringAudioTrackResolver(null)
@@ -48,17 +49,31 @@ class LavaAudioManager : AudioManager {
             )
         playerManager.registerSourceManager(spotifySourceManager)
 
+        val lyr = LrcLibLyricsManager()
+
+        lyricsManager.registerLyricsManager(lyr)
+
+        /*
         val youtubeSourceManager =
             YoutubeAudioSourceManager(
                 TvHtml5Embedded(),
                 WebWithThumbnail(),
-                MWebWithThumbnail(),
+                MWebWithThumbnail(
+                    ClientOptions().apply {
+                        playback = false
+                    },
+                ),
             )
         youtubeSourceManager.useOauth2(System.getenv("YT_REFRESH_TOKEN"), true)
         playerManager.registerSourceManager(youtubeSourceManager)
 
-        // val ytdlManager = YtdlpAudioSourceManager("C:\\Users\\anton\\Documents\\ytdlp\\yt-dlp.exe")
-        // playerManager.registerSourceManager(ytdlManager)
+
+         */
+
+        // val ytdlManager = YtdlpAudioSourceManager("/usr/local/bin/yt-dlp")
+
+        val ytdlManager = YtdlpAudioSourceManager("C:\\Users\\anton\\Documents\\ytdlp\\yt-dlp.exe")
+        playerManager.registerSourceManager(ytdlManager)
 
         AudioSourceManagers.registerLocalSource(playerManager)
 
@@ -433,16 +448,13 @@ class LavaAudioManager : AudioManager {
     override fun getLyrics(
         channel: MessageChannel,
         guild: Guild,
-    ): String? {
+    ): AudioLyrics? {
         val player = getOrCreatePlayer(guild, channel)
         val currentTrack = player.player.playingTrack ?: return null
 
-        val lyricsSource = LyricsSource()
         val lyrics =
-            lyricsSource.fetchLyrics(
-                currentTrack.info.title,
-                currentTrack.info.author,
-                currentTrack.info.length,
+            lyricsManager.loadLyrics(
+                currentTrack,
             )
 
         return lyrics

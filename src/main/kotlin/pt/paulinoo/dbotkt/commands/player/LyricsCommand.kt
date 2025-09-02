@@ -50,7 +50,7 @@ class LyricsCommand(
             Embed.create(
                 EmbedLevel.INFO,
                 "Lyrics for current track:",
-                lyrics,
+                lyrics.text,
             ).build()
 
         val deleteEmoji = Emoji.fromUnicode("U+274C")
