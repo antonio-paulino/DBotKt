@@ -20,6 +20,7 @@ A Kotlin Discord bot project using Lavaplayer for audio playback and Spotify int
 - Gradle
 - Discord bot token
 - Spotify API credentials (Client ID & Secret)
+- yt-dlp
 
 ## Setup
 
@@ -36,6 +37,8 @@ A Kotlin Discord bot project using Lavaplayer for audio playback and Spotify int
     - `SPOTIFY_CLIENT_ID`: Your Spotify client ID
     - `SPOTIFY_CLIENT_SECRET`: Your Spotify client secret
     - `PREFIXES`: Command prefixes for the bot separated by a space (e.g., `! ?`)
+    - `ADMIN_IDS`: Comma-separated list of Discord user IDs with admin privileges
+    - `YTDLP_PATH`: Path to yt-dlp executable for improved YouTube support
 
 3. **Build the project:**
    ```bash
@@ -67,8 +70,10 @@ Make sure you have Docker installed.
          - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
          - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
          - DISCORD_TOKEN=${DISCORD_TOKEN}
+         - YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN}
          - PREFIXES=! .
          - ADMIN_IDS=${ADMIN_IDS}
+         - YTDLP_PATH=${YTDLP_PATH}
    ```
    Then start the container:
 
@@ -86,6 +91,8 @@ Make sure you have Docker installed.
      -e SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET} \
      -e YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN} \
      -e PREFIXES="! ." \
+     -e ADMIN_IDS=${ADMIN_IDS} \
+     -e YTDLP_PATH=${YTDLP_PATH} \
      paulinoo/dbotkt:latest
    ```
    If you want to build the image yourself, you can use the provided [Dockerfile](Dockerfile):
@@ -119,7 +126,7 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 - [Lavasrc](https://github.com/topi314/LavaSrc)
 - [Youtube-source](https://github.com/lavalink-devs/youtube-source)
 - [udpqueue](https://github.com/MinnDevelopment/udpqueue.rs)
-- [lrclib](https://github.com/tranxuanthang/lrclib)
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 
 ## License
 

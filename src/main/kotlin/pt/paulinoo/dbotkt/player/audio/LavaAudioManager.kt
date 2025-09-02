@@ -66,13 +66,11 @@ class LavaAudioManager : AudioManager {
             )
         youtubeSourceManager.useOauth2(System.getenv("YT_REFRESH_TOKEN"), true)
         playerManager.registerSourceManager(youtubeSourceManager)
-
-
          */
 
-        // val ytdlManager = YtdlpAudioSourceManager("/usr/local/bin/yt-dlp")
-
-        val ytdlManager = YtdlpAudioSourceManager("C:\\Users\\anton\\Documents\\ytdlp\\yt-dlp.exe")
+        val ytdlManager = YtdlpAudioSourceManager(System.getenv("YTDLP_PATH")
+            ?: throw IllegalArgumentException("Missing YTDLP_PATH")
+        )
         playerManager.registerSourceManager(ytdlManager)
 
         AudioSourceManagers.registerLocalSource(playerManager)

@@ -10,3 +10,4 @@ services:
       - YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN}
       - PREFIXES=! . # Space-separated list of command prefixes
       - ADMIN_IDS=${ADMIN_IDS} # Comma-separated list of admin IDs
+      - YTDLP_PATH=${YTDLP_PATH} # Path to yt-dlp binary
