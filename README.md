@@ -5,6 +5,7 @@ A Kotlin Discord bot project using Lavaplayer for audio playback and Spotify int
 ## TODO
 - [ ] Make the bot more configurable via environment variables.
 - [ ] Improve error handling and logging.
+- [ ] Add spotify lyrics support.
 
 ## Features
 

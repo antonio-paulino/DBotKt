@@ -452,10 +452,11 @@ class LavaAudioManager : AudioManager {
         val player = getOrCreatePlayer(guild, channel)
         val currentTrack = player.player.playingTrack ?: return null
 
-        val lyrics =
-            lyricsManager.loadLyrics(
-                currentTrack,
-            )
+        if (System.getenv("SP_DC_COOKIE") == null) {
+            return null
+        }
+
+        val lyrics = lyricsManager.loadLyrics(currentTrack)
 
         return lyrics
     }
