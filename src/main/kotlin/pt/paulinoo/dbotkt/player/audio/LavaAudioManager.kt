@@ -68,9 +68,11 @@ class LavaAudioManager : AudioManager {
         playerManager.registerSourceManager(youtubeSourceManager)
          */
 
-        val ytdlManager = YtdlpAudioSourceManager(System.getenv("YTDLP_PATH")
-            ?: throw IllegalArgumentException("Missing YTDLP_PATH")
-        )
+        val ytdlManager =
+            YtdlpAudioSourceManager(
+                System.getenv("YTDLP_PATH")
+                    ?: throw IllegalArgumentException("Missing YTDLP_PATH"),
+            )
         playerManager.registerSourceManager(ytdlManager)
 
         AudioSourceManagers.registerLocalSource(playerManager)
