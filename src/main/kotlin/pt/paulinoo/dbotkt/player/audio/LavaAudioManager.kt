@@ -122,7 +122,6 @@ class LavaAudioManager : AudioManager {
                             ).build()
                         channel.sendMessageEmbeds(embed).queue {
                             it.delete().queueAfter(10, TimeUnit.SECONDS)
-                            PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                         }
                     } else {
                         logger.info("Playing track immediately: ${track.info.title}")
@@ -153,7 +152,6 @@ class LavaAudioManager : AudioManager {
                                 ).build()
                             channel.sendMessageEmbeds(embed).queue {
                                 it.delete().queueAfter(10, TimeUnit.SECONDS)
-                                PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                             }
                         } else {
                             if (player.player.playingTrack == null) {
@@ -177,7 +175,6 @@ class LavaAudioManager : AudioManager {
                                     ).build()
                                 channel.sendMessageEmbeds(embed).queue {
                                     it.delete().queueAfter(10, TimeUnit.SECONDS)
-                                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                                 }
                             }
                         }
@@ -199,7 +196,6 @@ class LavaAudioManager : AudioManager {
                         ).build()
                     channel.sendMessageEmbeds(embed).queue {
                         it.delete().queueAfter(10, TimeUnit.SECONDS)
-                        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                     }
                 }
 
@@ -213,11 +209,11 @@ class LavaAudioManager : AudioManager {
                         ).build()
                     channel.sendMessageEmbeds(embed).queue {
                         it.delete().queueAfter(10, TimeUnit.SECONDS)
-                        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                     }
                 }
             },
         )
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
     }
 
     override fun loadAndPlayPlaylist(
@@ -452,7 +448,7 @@ class LavaAudioManager : AudioManager {
         val player = getOrCreatePlayer(guild, channel)
         val currentTrack = player.player.playingTrack ?: return null
 
-        if (System.getenv("SP_DC_COOKIE") == null) {
+        if (currentTrack.sourceManager is SpotifySourceManager) {
             return null
         }
 
