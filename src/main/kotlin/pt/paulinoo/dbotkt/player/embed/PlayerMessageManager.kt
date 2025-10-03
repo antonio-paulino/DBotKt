@@ -32,9 +32,13 @@ object PlayerMessageManager {
                         .setComponents(*buttons)
                         .build()
 
-                channel.sendMessage(message).queue {
+                channel.sendMessage(message).queue { sentMessage ->
                     synchronized(playerMessages) {
-                        playerMessages[guild.idLong] = it
+                        if (playerMessages[guild.idLong] == null) {
+                            playerMessages[guild.idLong] = sentMessage
+                        } else {
+                            sentMessage.delete().queue()
+                        }
                     }
                 }
             }

@@ -132,90 +132,81 @@ class LavaAudioManager : AudioManager {
             trackUrl,
             object : AudioLoadResultHandler {
                 override fun trackLoaded(track: AudioTrack) {
-                    try {
-                        track.userData = TrackMetadata(requesterId = requesterId)
-                        if (!player.player.startTrack(track, true)) {
-                            player.queue.add(track)
-                            logger.info("Added track to queue: ${track.info.title}")
+                    track.userData = TrackMetadata(requesterId = requesterId)
+                    if (!player.player.startTrack(track, true)) {
+                        player.queue.add(track)
+                        logger.info("Added track to queue: ${track.info.title}")
+                        val embed =
+                            Embed.create(
+                                EmbedLevel.INFO,
+                                "Track Added",
+                                "Added track: ${track.info.title} - ${track.info.author} to the queue.",
+                            ).build()
+                        channel.sendMessageEmbeds(embed).queue {
+                            it.delete().queueAfter(10, TimeUnit.SECONDS)
+                        }
+                    } else {
+                        logger.info("Playing track immediately: ${track.info.title}")
+                        val embed =
+                            Embed.create(
+                                EmbedLevel.INFO,
+                                "Now Playing",
+                                "Now playing: ${track.info.title} - ${track.info.author}",
+                            ).build()
+                        channel.sendMessageEmbeds(embed).queue {
+                            it.delete().queueAfter(10, TimeUnit.SECONDS)
+                        }
+                    }
+                }
+
+                override fun playlistLoaded(playlist: AudioPlaylist) {
+                    playlist.tracks.forEach { it.userData = TrackMetadata(requesterId) }
+                    val firstTrack = playlist.selectedTrack ?: playlist.tracks.firstOrNull()
+                    if (firstTrack != null) {
+                        if (queueAll) {
+                            playlist.tracks.drop(1).forEach { player.queue.add(it) }
+                            logger.info("Playlist loaded: ${playlist.name}, queue size is now ${player.queue.size + 1}")
                             val embed =
                                 Embed.create(
                                     EmbedLevel.INFO,
-                                    "Track Added",
-                                    "Added track: ${track.info.title} - ${track.info.author} to the queue.",
+                                    "Playlist Loaded",
+                                    "Added ${playlist.tracks.size} tracks from playlist: ${playlist.name} to the queue.",
                                 ).build()
                             channel.sendMessageEmbeds(embed).queue {
                                 it.delete().queueAfter(10, TimeUnit.SECONDS)
                             }
                         } else {
-                            logger.info("Playing track immediately: ${track.info.title}")
-                            val embed =
-                                Embed.create(
-                                    EmbedLevel.INFO,
-                                    "Now Playing",
-                                    "Now playing: ${track.info.title} - ${track.info.author}",
-                                ).build()
-                            channel.sendMessageEmbeds(embed).queue {
-                                it.delete().queueAfter(10, TimeUnit.SECONDS)
-                            }
-                        }
-                    } finally {
-                        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
-                    }
-                }
-
-                override fun playlistLoaded(playlist: AudioPlaylist) {
-                    try {
-                        playlist.tracks.forEach { it.userData = TrackMetadata(requesterId) }
-                        val firstTrack = playlist.selectedTrack ?: playlist.tracks.firstOrNull()
-                        if (firstTrack != null) {
-                            if (queueAll) {
-                                playlist.tracks.drop(1).forEach { player.queue.add(it) }
-                                logger.info("Playlist loaded: ${playlist.name}, queue size is now ${player.queue.size + 1}")
+                            if (player.player.playingTrack == null) {
+                                logger.info("Now playing: ${firstTrack.info.title}")
                                 val embed =
                                     Embed.create(
                                         EmbedLevel.INFO,
-                                        "Playlist Loaded",
-                                        "Added ${playlist.tracks.size} tracks from playlist: ${playlist.name} to the queue.",
+                                        "Now Playing",
+                                        "Now playing: ${firstTrack.info.title} - ${firstTrack.info.author}",
                                     ).build()
                                 channel.sendMessageEmbeds(embed).queue {
                                     it.delete().queueAfter(10, TimeUnit.SECONDS)
                                 }
+                                PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                             } else {
-                                if (player.player.playingTrack == null) {
-                                    logger.info("Now playing: ${firstTrack.info.title}")
-                                    val embed =
-                                        Embed.create(
-                                            EmbedLevel.INFO,
-                                            "Now Playing",
-                                            "Now playing: ${firstTrack.info.title} - ${firstTrack.info.author}",
-                                        ).build()
-                                    channel.sendMessageEmbeds(embed).queue {
-                                        it.delete().queueAfter(10, TimeUnit.SECONDS)
-                                    }
-                                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
-                                } else {
-                                    logger.info("Loaded only the first track from playlist: ${firstTrack.info.title}")
-                                    val embed =
-                                        Embed.create(
-                                            EmbedLevel.INFO,
-                                            "Track Loaded",
-                                            "Added track: ${firstTrack.info.title} - ${firstTrack.info.author} to the queue.",
-                                        ).build()
-                                    channel.sendMessageEmbeds(embed).queue {
-                                        it.delete().queueAfter(10, TimeUnit.SECONDS)
-                                    }
+                                logger.info("Loaded only the first track from playlist: ${firstTrack.info.title}")
+                                val embed =
+                                    Embed.create(
+                                        EmbedLevel.INFO,
+                                        "Track Loaded",
+                                        "Added track: ${firstTrack.info.title} - ${firstTrack.info.author} to the queue.",
+                                    ).build()
+                                channel.sendMessageEmbeds(embed).queue {
+                                    it.delete().queueAfter(10, TimeUnit.SECONDS)
                                 }
                             }
-                            if (player.player.startTrack(firstTrack, true)) {
-                                player.queue.remove(firstTrack)
-                            } else {
-                                player.queue.add(firstTrack)
-                            }
                         }
-                    } finally {
-                        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
+                        if (player.player.startTrack(firstTrack, true)) {
+                            player.queue.remove(firstTrack)
+                        } else {
+                            player.queue.add(firstTrack)
+                        }
                     }
-                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                 }
 
                 override fun noMatches() {
