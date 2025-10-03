@@ -128,6 +128,7 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 - [Youtube-source](https://github.com/lavalink-devs/youtube-source)
 - [udpqueue](https://github.com/MinnDevelopment/udpqueue.rs)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+- [yt-cipher](https://github.com/kikkia/yt-cipher/)
 
 ## License
 
