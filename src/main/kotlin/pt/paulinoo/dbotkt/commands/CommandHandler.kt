@@ -2,6 +2,7 @@ package pt.paulinoo.dbotkt.commands
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import org.slf4j.LoggerFactory
+import java.time.Clock.systemDefaultZone
 import java.time.LocalTime
 
 class CommandHandler(private val commands: List<Command>) {
@@ -21,7 +22,9 @@ class CommandHandler(private val commands: List<Command>) {
 
         val command = commandMap[name] ?: return
 
-        logger.info("[${LocalTime.now()}] Command executed: ${command.name} by ${event.author.name} in ${event.guild.name}")
+        logger.info(
+            "[${LocalTime.now(systemDefaultZone())}] Command executed: ${command.name} by ${event.author.name} in ${event.guild.name}",
+        )
         command.execute(event, args)
     }
 }

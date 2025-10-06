@@ -81,7 +81,6 @@ class DiscordBot() : CoroutineScope {
         if (!jda.awaitShutdown(Duration.ofSeconds(10))) {
             jda.shutdownNow()
             jda.awaitShutdown()
-
             job.cancel()
         }
     }

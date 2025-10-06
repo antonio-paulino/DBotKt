@@ -126,7 +126,6 @@ class LavaAudioManager : AudioManager {
         queueAll: Boolean,
     ) {
         val player = getOrCreatePlayer(guild, channel)
-
         playerManager.loadItemOrdered(
             player,
             trackUrl,
@@ -157,6 +156,7 @@ class LavaAudioManager : AudioManager {
                             it.delete().queueAfter(10, TimeUnit.SECONDS)
                         }
                     }
+                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                 }
 
                 override fun playlistLoaded(playlist: AudioPlaylist) {
@@ -187,7 +187,6 @@ class LavaAudioManager : AudioManager {
                                 channel.sendMessageEmbeds(embed).queue {
                                     it.delete().queueAfter(10, TimeUnit.SECONDS)
                                 }
-                                PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                             } else {
                                 logger.info("Loaded only the first track from playlist: ${firstTrack.info.title}")
                                 val embed =
@@ -207,6 +206,7 @@ class LavaAudioManager : AudioManager {
                             player.queue.add(firstTrack)
                         }
                     }
+                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                 }
 
                 override fun noMatches() {
@@ -220,6 +220,7 @@ class LavaAudioManager : AudioManager {
                     channel.sendMessageEmbeds(embed).queue {
                         it.delete().queueAfter(10, TimeUnit.SECONDS)
                     }
+                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                 }
 
                 override fun loadFailed(exception: FriendlyException) {
@@ -233,6 +234,7 @@ class LavaAudioManager : AudioManager {
                     channel.sendMessageEmbeds(embed).queue {
                         it.delete().queueAfter(10, TimeUnit.SECONDS)
                     }
+                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                 }
             },
         )
@@ -270,13 +272,9 @@ class LavaAudioManager : AudioManager {
         songsMetadata: List<String>,
         requesterId: Long,
     ) {
-        try {
-            songsMetadata.forEach { song ->
-                val trackUrl = "ytsearch:$song"
-                loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = false)
-                PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
-            }
-        } finally {
+        songsMetadata.forEach { song ->
+            val trackUrl = "ytsearch:$song"
+            loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = false)
             PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
         }
     }

@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.embed.PlayerMessageManager
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.MINUTES
 import kotlin.time.Duration.Companion.minutes
 
 class TrackScheduler(
@@ -38,6 +38,7 @@ class TrackScheduler(
                 player.startTrack(next, false)
             } else {
                 PlayerMessageManager.removePlayerMessage(guild)
+
                 disconnectJob =
                     scope.launch {
                         val embed =
@@ -48,7 +49,7 @@ class TrackScheduler(
                             ).build()
 
                         channel.sendMessageEmbeds(embed).queue { message ->
-                            message.delete().queueAfter(1, TimeUnit.MINUTES)
+                            message.delete().queueAfter(1, MINUTES)
                         }
 
                         delay(5.minutes)
@@ -60,7 +61,7 @@ class TrackScheduler(
                                 "I have been inactive for 5 minutes. Leaving the voice channel.",
                             ).build()
                         channel.sendMessageEmbeds(leaveEmbed).queue { message ->
-                            message.delete().queueAfter(1, TimeUnit.MINUTES)
+                            message.delete().queueAfter(1, MINUTES)
                         }
                         audioManager.stop(channel, guild)
                     }

@@ -17,38 +17,33 @@ object PlayerMessageManager {
     ) {
         val embed = PlayerEmbed.createPlayerEmbed(guild, audioManager)
         val buttons = PlayerEmbed.createPlayerButtons()
+        val existingMessage = playerMessages[guild.idLong]
 
-        synchronized(playerMessages) {
-            val existingMessage = playerMessages[guild.idLong]
-
-            if (existingMessage != null) {
-                existingMessage.editMessageEmbeds(embed)
+        if (existingMessage != null) {
+            existingMessage.editMessageEmbeds(embed)
+                .setComponents(*buttons)
+                .queue(
+                    { updated -> playerMessages[guild.idLong] = updated },
+                    { error ->
+                        println("Falha ao editar mensagem de player: ${error.message}")
+                        playerMessages.remove(guild.idLong)
+                    },
+                )
+        } else {
+            val message =
+                MessageCreateBuilder()
+                    .setEmbeds(embed)
                     .setComponents(*buttons)
-                    .queue()
-            } else {
-                val message =
-                    MessageCreateBuilder()
-                        .setEmbeds(embed)
-                        .setComponents(*buttons)
-                        .build()
+                    .build()
 
-                channel.sendMessage(message).queue { sentMessage ->
-                    synchronized(playerMessages) {
-                        if (playerMessages[guild.idLong] == null) {
-                            playerMessages[guild.idLong] = sentMessage
-                        } else {
-                            sentMessage.delete().queue()
-                        }
-                    }
-                }
-            }
+            channel.sendMessage(message).queue(
+                { sentMessage -> playerMessages[guild.idLong] = sentMessage },
+                { error -> println("Falha ao enviar mensagem de player: ${error.message}") },
+            )
         }
     }
 
     fun removePlayerMessage(guild: Guild) {
-        synchronized(playerMessages) {
-            val message = playerMessages.remove(guild.idLong)
-            message?.delete()?.queue()
-        }
+        playerMessages.remove(guild.idLong)?.delete()?.queue()
     }
 }
