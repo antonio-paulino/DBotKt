@@ -142,6 +142,7 @@ class LavaAudioManager : AudioManager {
                                 "Added track: ${track.info.title} - ${track.info.author} to the queue.",
                             ).build()
                         channel.sendMessageEmbeds(embed).queue {
+                            PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                             it.delete().queueAfter(10, TimeUnit.SECONDS)
                         }
                     } else {
@@ -156,7 +157,6 @@ class LavaAudioManager : AudioManager {
                             it.delete().queueAfter(10, TimeUnit.SECONDS)
                         }
                     }
-                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                 }
 
                 override fun playlistLoaded(playlist: AudioPlaylist) {
@@ -173,6 +173,7 @@ class LavaAudioManager : AudioManager {
                                     "Added ${playlist.tracks.size} tracks from playlist: ${playlist.name} to the queue.",
                                 ).build()
                             channel.sendMessageEmbeds(embed).queue {
+                                PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                                 it.delete().queueAfter(10, TimeUnit.SECONDS)
                             }
                         } else {
@@ -196,6 +197,7 @@ class LavaAudioManager : AudioManager {
                                         "Added track: ${firstTrack.info.title} - ${firstTrack.info.author} to the queue.",
                                     ).build()
                                 channel.sendMessageEmbeds(embed).queue {
+                                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                                     it.delete().queueAfter(10, TimeUnit.SECONDS)
                                 }
                             }
@@ -206,7 +208,6 @@ class LavaAudioManager : AudioManager {
                             player.queue.add(firstTrack)
                         }
                     }
-                    PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                 }
 
                 override fun noMatches() {
@@ -246,11 +247,7 @@ class LavaAudioManager : AudioManager {
         trackUrl: String,
         requesterId: Long,
     ) {
-        try {
-            loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = true)
-        } finally {
-            PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
-        }
+        loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = true)
     }
 
     override fun loadAndPlaySong(
@@ -259,11 +256,7 @@ class LavaAudioManager : AudioManager {
         trackUrl: String,
         requesterId: Long,
     ) {
-        try {
-            loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = false)
-        } finally {
-            PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
-        }
+        loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = false)
     }
 
     override fun loadAndPlaySpotifyPlaylist(
