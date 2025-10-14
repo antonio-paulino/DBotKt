@@ -63,9 +63,10 @@ class LavaAudioManager : AudioManager {
 
         val ytOptions =
             YoutubeSourceOptions()
-                .setRemoteCipherUrl(
+                .setRemoteCipher(
                     "http://ejs-api:8001",
                     "test",
+                    null,
                 )
         val youtubeSourceManager =
             YoutubeAudioSourceManager(
