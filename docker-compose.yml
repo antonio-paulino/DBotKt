@@ -11,6 +11,8 @@ services:
       - PREFIXES=! . # Space-separated list of command prefixes
       - ADMIN_IDS=${ADMIN_IDS} # Comma-separated list of admin IDs
       - YTDLP_PATH=${YTDLP_PATH} # Path to yt-dlp binary
+      - YT_CIPHER=http://ejs-api:8001 # URL of the ejs-api service
+      - YT_CIPHER_PASSWORD=${YT_CIPHER_PASSWORD} # Password for accessing the ejs-api service
     networks:
       - internal_network
 
@@ -18,7 +20,7 @@ services:
     image: ghcr.io/kikkia/yt-cipher:master
     container_name: ejs_signature_api
     environment:
-      - API_TOKEN=test
+      - API_TOKEN=${YT_CIPHER_PASSWORD} # Password for accessing the API
     restart: unless-stopped
     networks:
       - internal_network

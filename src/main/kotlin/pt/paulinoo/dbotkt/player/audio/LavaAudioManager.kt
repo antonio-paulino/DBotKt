@@ -64,8 +64,10 @@ class LavaAudioManager : AudioManager {
         val ytOptions =
             YoutubeSourceOptions()
                 .setRemoteCipher(
-                    "http://ejs-api:8001",
-                    "test",
+                    System.getenv("YT_CIPHER")
+                        ?: throw IllegalArgumentException("Missing YT_CIPHER_PATH"),
+                    System.getenv("YT_CIPHER_PASSWORD")
+                        ?: throw IllegalArgumentException("Missing YT_CIPHER_PASSWORD"),
                     null,
                 )
         val youtubeSourceManager =

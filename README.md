@@ -40,6 +40,8 @@ A Kotlin Discord bot project using Lavaplayer for audio playback and Spotify int
     - `PREFIXES`: Command prefixes for the bot separated by a space (e.g., `! ?`)
     - `ADMIN_IDS`: Comma-separated list of Discord user IDs with admin privileges
     - `YTDLP_PATH`: Path to yt-dlp executable for improved YouTube support
+    - `YT_REFRESH_TOKEN`: Refresh token for YouTube Data API
+    - `YT_CIPHER`: Check `https://github.com/kikkia/yt-cipher/` — used for decrypting YouTube signatures.
 
 3. **Build the project:**
    ```bash
@@ -59,23 +61,7 @@ Make sure you have Docker installed.
 ### Using Prebuilt Image
 
 1. **Run with Docker Compose:**  
-   Update the [docker-compose.yml](docker-compose.yml) file to use the prebuilt image:
-
-   ```yaml
-   services:
-     dbotkt:
-       container_name: DBotKT
-       restart: always
-       image: paulinoo/dbotkt:latest
-       environment:
-         - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
-         - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
-         - DISCORD_TOKEN=${DISCORD_TOKEN}
-         - YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN}
-         - PREFIXES=! .
-         - ADMIN_IDS=${ADMIN_IDS}
-         - YTDLP_PATH=${YTDLP_PATH}
-   ```
+   Update the [docker-compose.yml](docker-compose.yml) file to use the prebuilt image and set your environment variables.
    Then start the container:
 
    ```bash
@@ -94,6 +80,8 @@ Make sure you have Docker installed.
      -e PREFIXES="! ." \
      -e ADMIN_IDS=${ADMIN_IDS} \
      -e YTDLP_PATH=${YTDLP_PATH} \
+     -e YT_CIPHER=${YT_CIPHER} \
+     -e YT_CIPHER_PASSWORD=${YT_CIPHER_PASSWORD} \
      paulinoo/dbotkt:latest
    ```
    If you want to build the image yourself, you can use the provided [Dockerfile](Dockerfile):
