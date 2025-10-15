@@ -174,7 +174,6 @@ class LavaAudioManager : AudioManager {
                                     "Added ${playlist.tracks.size} tracks from playlist: ${playlist.name} to the queue.",
                                 ).build()
                             channel.sendMessageEmbeds(embed).queue {
-                                PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this@LavaAudioManager)
                                 it.delete().queueAfter(10, TimeUnit.SECONDS)
                             }
                         } else {
