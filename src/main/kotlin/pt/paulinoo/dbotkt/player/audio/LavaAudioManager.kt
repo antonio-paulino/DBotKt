@@ -3,7 +3,6 @@ package pt.paulinoo.dbotkt.player.audio
 import com.github.topi314.lavalyrics.LyricsManager
 import com.github.topi314.lavalyrics.lyrics.AudioLyrics
 import com.github.topi314.lavasearch.SearchManager
-import com.github.topi314.lavasrc.lrclib.LrcLibLyricsManager
 import com.github.topi314.lavasrc.mirror.DefaultMirroringAudioTrackResolver
 import com.github.topi314.lavasrc.spotify.SpotifySourceManager
 import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats
@@ -29,6 +28,7 @@ import org.slf4j.LoggerFactory
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.embed.PlayerMessageManager
+import pt.paulinoo.dbotkt.player.lyrics.LrcLibLyricsManager
 import java.util.concurrent.TimeUnit
 
 class LavaAudioManager : AudioManager {
@@ -56,10 +56,6 @@ class LavaAudioManager : AudioManager {
                 mirroringResolver,
             )
         playerManager.registerSourceManager(spotifySourceManager)
-
-        val lyr = LrcLibLyricsManager()
-
-        lyricsManager.registerLyricsManager(lyr)
 
         val ytOptions =
             YoutubeSourceOptions()
@@ -101,6 +97,10 @@ class LavaAudioManager : AudioManager {
          */
 
         AudioSourceManagers.registerLocalSource(playerManager)
+
+        val lyr = LrcLibLyricsManager()
+
+        lyricsManager.registerLyricsManager(lyr)
 
         playerManager.configuration.apply {
             resamplingQuality = AudioConfiguration.ResamplingQuality.HIGH
@@ -446,14 +446,34 @@ class LavaAudioManager : AudioManager {
         guild: Guild,
     ) {
         val player = getOrCreatePlayer(guild, channel)
-        player.isLooping = !player.isLooping
-        logger.info(
-            if (player.isLooping) {
-                "Enabled looping in guild ${guild.name}"
-            } else {
-                "Disabled looping in guild ${guild.name}"
-            },
-        )
+
+        player.loopMode =
+            when (player.loopMode) {
+                LoopMode.NONE -> LoopMode.SINGLE
+                LoopMode.SINGLE -> if (player.queue.isEmpty()) LoopMode.NONE else LoopMode.QUEUE
+                LoopMode.QUEUE -> LoopMode.NONE
+            }
+
+        val modeText =
+            when (player.loopMode) {
+                LoopMode.NONE -> "disabled looping"
+                LoopMode.SINGLE -> "enabled **single-track loop**"
+                LoopMode.QUEUE -> "enabled **queue loop**"
+            }
+
+        logger.info("Loop mode set to ${player.loopMode} in guild ${guild.name}")
+
+        val embed =
+            Embed.create(
+                EmbedLevel.INFO,
+                "Loop Mode Updated",
+                "Loop mode is now set to $modeText.",
+            ).build()
+
+        channel.sendMessageEmbeds(embed).queue {
+            it.delete().queueAfter(10, TimeUnit.SECONDS)
+        }
+
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 

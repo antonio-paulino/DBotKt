@@ -30,14 +30,5 @@ class LoopButton(private val audioManager: AudioManager) : CustomButton {
             }
             return
         }
-        val embed =
-            Embed.create(
-                EmbedLevel.INFO,
-                if (player.isLooping) "Looping enabled." else "Looping disabled.",
-            ).build()
-
-        event.channel.sendMessageEmbeds(embed).queue { message ->
-            message.delete().queueAfter(10, TimeUnit.SECONDS)
-        }
     }
 }

@@ -10,12 +10,22 @@ class LavaPlayerAudioSendHandler(private val player: AudioPlayer) : AudioSendHan
     private val frameBuffer = ByteBuffer.allocate(DISCORD_OPUS.maximumChunkSize())
     private val frame = MutableAudioFrame().apply { setBuffer(frameBuffer) }
 
+    private var lastFrame: ByteArray? = null
+
     override fun canProvide(): Boolean {
-        return player.provide(frame)
+        val didProvide = player.provide(frame)
+        if (didProvide) {
+            frameBuffer.flip()
+            val data = ByteArray(frame.dataLength)
+            frameBuffer.get(data)
+            frameBuffer.clear()
+            lastFrame = data
+        }
+        return didProvide
     }
 
-    override fun provide20MsAudio(): ByteBuffer {
-        return (frameBuffer.flip() as ByteBuffer)
+    override fun provide20MsAudio(): ByteBuffer? {
+        return lastFrame?.let { ByteBuffer.wrap(it) }
     }
 
     override fun isOpus(): Boolean = true

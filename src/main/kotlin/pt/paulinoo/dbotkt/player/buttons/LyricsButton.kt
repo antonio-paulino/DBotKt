@@ -1,8 +1,6 @@
 package pt.paulinoo.dbotkt.player.buttons
 
-import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.interactions.components.buttons.Button
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
@@ -18,6 +16,7 @@ class LyricsButton(private val audioManager: AudioManager) : CustomButton {
             return
         }
 
+        /*
         val lyrics = audioManager.getLyrics(event.channel, guild)
         event.deferEdit().queue()
 
@@ -32,6 +31,7 @@ class LyricsButton(private val audioManager: AudioManager) : CustomButton {
             }
             return
         }
+
         val embed =
             Embed.create(
                 EmbedLevel.INFO,
@@ -47,5 +47,18 @@ class LyricsButton(private val audioManager: AudioManager) : CustomButton {
                 deleteEmoji,
             ),
         ).queue()
+         */
+
+        event.deferEdit().queue()
+
+        val embed =
+            Embed.create(
+                EmbedLevel.INFO,
+                "Lyrics feature is currently unavailable.",
+            ).build()
+
+        event.channel.sendMessageEmbeds(embed).queue { message ->
+            message.delete().queueAfter(10, TimeUnit.SECONDS)
+        }
     }
 }

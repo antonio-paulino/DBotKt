@@ -55,6 +55,16 @@ object PlayerEmbed {
             embedBuilder.addField("Requested by", "<@${it.requesterId}>", true)
         }
 
+        embedBuilder.addField(
+            "Loop Mode",
+            when (player.loopMode) {
+                pt.paulinoo.dbotkt.player.audio.LoopMode.NONE -> "None"
+                pt.paulinoo.dbotkt.player.audio.LoopMode.SINGLE -> "Single"
+                pt.paulinoo.dbotkt.player.audio.LoopMode.QUEUE -> "Queue"
+            },
+            false,
+        )
+
         if (player.queue.isNotEmpty()) {
             val totalQueueDuration = player.queue.sumOf { it.duration }
             embedBuilder

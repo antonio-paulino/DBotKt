@@ -33,6 +33,24 @@ class TrackScheduler(
         endReason: AudioTrackEndReason,
     ) {
         if (endReason.mayStartNext) {
+            val guildPlayer = audioManager.getGuildPlayer(guild) ?: return
+
+            when (guildPlayer.loopMode) {
+                LoopMode.SINGLE -> {
+                    val cloned = track.makeClone()
+                    cloned.userData = track.userData
+                    player.startTrack(cloned, false)
+                    return
+                }
+
+                LoopMode.QUEUE -> {
+                    val cloned = track.makeClone()
+                    cloned.userData = track.userData
+                    queue.addLast(cloned)
+                }
+
+                LoopMode.NONE -> Unit
+            }
             if (queue.isNotEmpty()) {
                 val next = queue.removeFirst()
                 player.startTrack(next, false)
@@ -49,7 +67,7 @@ class TrackScheduler(
                             ).build()
 
                         channel.sendMessageEmbeds(embed).queue { message ->
-                            message.delete().queueAfter(1, MINUTES)
+                            message.delete().queueAfter(1, java.util.concurrent.TimeUnit.MINUTES)
                         }
 
                         delay(5.minutes)
@@ -61,7 +79,7 @@ class TrackScheduler(
                                 "I have been inactive for 5 minutes. Leaving the voice channel.",
                             ).build()
                         channel.sendMessageEmbeds(leaveEmbed).queue { message ->
-                            message.delete().queueAfter(1, MINUTES)
+                            message.delete().queueAfter(1, java.util.concurrent.TimeUnit.MINUTES)
                         }
                         audioManager.stop(channel, guild)
                     }

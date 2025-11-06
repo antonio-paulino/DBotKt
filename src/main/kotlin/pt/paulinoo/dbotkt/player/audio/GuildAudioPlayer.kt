@@ -3,6 +3,12 @@ package pt.paulinoo.dbotkt.player.audio
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 
+enum class LoopMode {
+    NONE,
+    SINGLE,
+    QUEUE,
+}
+
 class GuildAudioPlayer(
     val player: AudioPlayer,
 ) {
@@ -11,7 +17,7 @@ class GuildAudioPlayer(
     val isPaused: Boolean
         get() = player.isPaused
 
-    var isLooping: Boolean = false
+    var loopMode: LoopMode = LoopMode.NONE
 
     fun clearQueue() {
         queue.clear()
