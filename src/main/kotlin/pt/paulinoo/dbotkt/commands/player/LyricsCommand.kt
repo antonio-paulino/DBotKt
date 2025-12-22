@@ -1,8 +1,9 @@
 package pt.paulinoo.dbotkt.commands.player
 
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.buttons.Button
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import net.dv8tion.jda.api.interactions.components.buttons.Button
 import pt.paulinoo.dbotkt.commands.Command
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
@@ -55,11 +56,14 @@ class LyricsCommand(
 
         val deleteEmoji = Emoji.fromUnicode("U+274C")
 
-        event.channel.sendMessageEmbeds(embed).setActionRow(
-            Button.secondary(
-                "button_delete",
-                deleteEmoji,
-            ),
-        ).queue()
+        event.channel.sendMessageEmbeds(embed)
+            .setComponents(
+                ActionRow.of(
+                    Button.secondary(
+                        "button_delete",
+                        deleteEmoji,
+                    ),
+                ),
+            ).queue()
     }
 }

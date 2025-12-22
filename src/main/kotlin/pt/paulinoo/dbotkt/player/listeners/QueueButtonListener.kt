@@ -1,9 +1,10 @@
 package pt.paulinoo.dbotkt.player.listeners
 
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.buttons.Button
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import net.dv8tion.jda.api.interactions.components.buttons.Button
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
@@ -77,7 +78,7 @@ class QueueButtonListener(
         newComponents.add(Button.secondary("queue_delete:$guildId:$newPage", deleteEmoji))
 
         event.editMessageEmbeds(newEmbed)
-            .setActionRow(newComponents)
+            .setComponents(ActionRow.of(newComponents))
             .queue()
     }
 }

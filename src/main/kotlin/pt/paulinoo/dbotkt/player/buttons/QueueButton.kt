@@ -1,8 +1,9 @@
 package pt.paulinoo.dbotkt.player.buttons
 
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.buttons.Button
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.interactions.components.buttons.Button
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
@@ -58,7 +59,7 @@ class QueueButton(private val audioManager: AudioManager) : CustomButton {
 
         event.deferEdit().queue()
         channel.sendMessageEmbeds(embed)
-            .setActionRow(components)
+            .setComponents(ActionRow.of(components))
             .queue()
     }
 }

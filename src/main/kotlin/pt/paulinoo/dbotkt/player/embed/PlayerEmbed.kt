@@ -1,12 +1,12 @@
 package pt.paulinoo.dbotkt.player.embed
 
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.buttons.Button
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
-import net.dv8tion.jda.api.interactions.components.ActionRow
-import net.dv8tion.jda.api.interactions.components.buttons.Button
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
@@ -18,13 +18,11 @@ object PlayerEmbed {
         guild: Guild,
         audioManager: AudioManager,
     ): MessageEmbed {
-        val player = audioManager.getGuildPlayer(guild)
-        if (player == null) {
-            return Embed.create(
+        val player =
+            audioManager.getGuildPlayer(guild) ?: return Embed.create(
                 EmbedLevel.ERROR,
                 "No audio player found for this guild. Please join a voice channel and play something first.",
             ).build()
-        }
 
         val track =
             player.player.playingTrack ?: return EmbedBuilder()
@@ -112,13 +110,11 @@ object PlayerEmbed {
         page: Int,
         audioManager: AudioManager,
     ): MessageEmbed {
-        val player = audioManager.getGuildPlayer(guild)
-        if (player == null) {
-            return Embed.create(
+        val player =
+            audioManager.getGuildPlayer(guild) ?: return Embed.create(
                 EmbedLevel.ERROR,
                 "No audio player found for this guild. Please join a voice channel and play something first.",
             ).build()
-        }
         val queue = player.queue
         val tracksPerPage = 10
         val totalPages = (queue.size + tracksPerPage - 1) / tracksPerPage

@@ -27,12 +27,12 @@ dependencies {
     implementation("com.github.topi314.lavasrc:lavasrc:4.8.1")
     implementation("com.github.topi314.lavasrc:lavasrc-protocol:4.8.1")
     implementation("com.github.topi314.lavalyrics:lavalyrics:1.1.0")
-    implementation("dev.arbjerg:lavaplayer:2.2.4")
+    implementation("dev.arbjerg:lavaplayer:2.2.6")
     implementation("dev.lavalink.youtube:v2:1.16.0")
-    implementation("net.dv8tion:JDA:5.6.1")
+    implementation("net.dv8tion:JDA:6.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("org.slf4j:slf4j-simple:2.0.17")
-    implementation("se.michaelthelin.spotify:spotify-web-api-java:9.3.0")
+    implementation("se.michaelthelin.spotify:spotify-web-api-java:9.4.0")
     testImplementation(kotlin("test"))
 }
 

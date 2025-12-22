@@ -1,10 +1,11 @@
 package pt.paulinoo.dbotkt.commands.slash
 
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.buttons.Button
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
-import net.dv8tion.jda.api.interactions.components.buttons.Button
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 
@@ -46,11 +47,14 @@ class HelpSlashCommand : SlashCommand {
 
         event.replyEmbeds(
             embed,
-        ).setActionRow(
-            Button.secondary(
-                "button_delete",
-                deleteEmoji,
-            ),
-        ).queue()
+        )
+            .setComponents(
+                ActionRow.of(
+                    Button.secondary(
+                        "button_delete",
+                        deleteEmoji,
+                    ),
+                ),
+            ).queue()
     }
 }

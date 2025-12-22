@@ -1,8 +1,9 @@
 package pt.paulinoo.dbotkt.commands.player
 
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.buttons.Button
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import net.dv8tion.jda.api.interactions.components.buttons.Button
 import pt.paulinoo.dbotkt.commands.Command
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
@@ -52,7 +53,7 @@ class QueueCommand(
             }
 
         channel.sendMessageEmbeds(embed)
-            .setActionRow(components)
+            .setComponents(ActionRow.of(components))
             .queue()
     }
 }
