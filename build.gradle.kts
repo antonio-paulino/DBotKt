@@ -28,7 +28,7 @@ dependencies {
     implementation("com.github.topi314.lavasrc:lavasrc-protocol:4.8.1")
     implementation("com.github.topi314.lavalyrics:lavalyrics:1.1.0")
     implementation("dev.arbjerg:lavaplayer:2.2.6")
-    implementation("dev.lavalink.youtube:v2:1.17.0")
+    implementation("dev.lavalink.youtube:v2:1.18.0")
     implementation("net.dv8tion:JDA:6.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("org.slf4j:slf4j-simple:2.0.17")

@@ -20,7 +20,7 @@ import dev.lavalink.youtube.clients.ClientOptions
 import dev.lavalink.youtube.clients.MWeb
 import dev.lavalink.youtube.clients.Music
 import dev.lavalink.youtube.clients.Tv
-import dev.lavalink.youtube.clients.TvHtml5Embedded
+import dev.lavalink.youtube.clients.TvHtml5Simply
 import dev.lavalink.youtube.clients.Web
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
@@ -70,7 +70,7 @@ class LavaAudioManager : AudioManager {
             YoutubeAudioSourceManager(
                 ytOptions,
                 Tv(),
-                TvHtml5Embedded(),
+                TvHtml5Simply(),
                 AndroidVr(),
                 Web(),
                 MWeb(),
