@@ -1,5 +1,6 @@
 package pt.paulinoo.dbotkt.bot
 
+import club.minnced.discord.jdave.interop.JDaveSessionFactory
 import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -7,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.audio.AudioModuleConfig
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
@@ -62,7 +64,13 @@ class DiscordBot() : CoroutineScope {
                 ButtonListener(audioManager),
                 VoiceChannelEmptyListener(audioManager),
             )
-            .setAudioSendFactory(NativeAudioSendFactory())
+            .setAudioModuleConfig(
+                AudioModuleConfig()
+                    .withAudioSendFactory(
+                        NativeAudioSendFactory(),
+                    )
+                    .withDaveSessionFactory(JDaveSessionFactory()),
+            )
             .setActivity(Activity.listening("/help"))
             .build()
             .awaitReady()

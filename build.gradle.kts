@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.1.21"
+    kotlin("jvm") version "2.3.10"
     id("org.jlleitschuh.gradle.ktlint") version "12.3.0"
 }
 
@@ -15,21 +15,26 @@ repositories {
 }
 
 dependencies {
-    implementation("club.minnced:udpqueue-native-linux-x86-64:0.2.9")
-    implementation("club.minnced:udpqueue-native-linux-x86:0.2.9")
-    implementation("club.minnced:udpqueue-native-linux-aarch64:0.2.9")
-    implementation("club.minnced:udpqueue-native-linux-arm:0.2.9")
-    implementation("club.minnced:udpqueue-native-linux-musl-x86-64:0.2.9")
-    implementation("club.minnced:udpqueue-native-linux-musl-aarch64:0.2.9")
-    implementation("club.minnced:udpqueue-native-win-x86-64:0.2.9")
-    implementation("club.minnced:udpqueue-native-win-x86:0.2.9")
-    implementation("club.minnced:udpqueue-native-darwin:0.2.9")
+    implementation("club.minnced:jdave-api:0.1.7")
+    implementation("club.minnced:jdave-native-linux-x86-64:0.1.7")
+    implementation("club.minnced:jdave-native-linux-aarch64:0.1.7")
+    implementation("club.minnced:jdave-native-win-x86-64:0.1.7")
+    implementation("club.minnced:jdave-native-darwin:0.1.7")
+    implementation("club.minnced:udpqueue-native-linux-x86-64:0.2.12")
+    implementation("club.minnced:udpqueue-native-linux-x86:0.2.12")
+    implementation("club.minnced:udpqueue-native-linux-aarch64:0.2.12")
+    implementation("club.minnced:udpqueue-native-linux-arm:0.2.12")
+    implementation("club.minnced:udpqueue-native-linux-musl-x86-64:0.2.12")
+    implementation("club.minnced:udpqueue-native-linux-musl-aarch64:0.2.12")
+    implementation("club.minnced:udpqueue-native-win-x86-64:0.2.12")
+    implementation("club.minnced:udpqueue-native-win-x86:0.2.12")
+    implementation("club.minnced:udpqueue-native-darwin:0.2.12")
     implementation("com.github.topi314.lavasrc:lavasrc:4.8.1")
     implementation("com.github.topi314.lavasrc:lavasrc-protocol:4.8.1")
     implementation("com.github.topi314.lavalyrics:lavalyrics:1.1.0")
     implementation("dev.arbjerg:lavaplayer:2.2.6")
     implementation("dev.lavalink.youtube:v2:1.18.0")
-    implementation("net.dv8tion:JDA:6.3.0")
+    implementation("net.dv8tion:JDA:6.3.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("org.slf4j:slf4j-simple:2.0.17")
     implementation("se.michaelthelin.spotify:spotify-web-api-java:9.4.0")
@@ -40,7 +45,7 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 tasks.register<Copy>("copyRuntimeDependencies") {
@@ -59,6 +64,10 @@ tasks.register<Jar>("uberJar") {
     from(sourceSets.main.get().output)
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
     destinationDirectory.set(file("."))
+}
+
+tasks.withType<JavaExec> {
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
 }
 
 tasks {
