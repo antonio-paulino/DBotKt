@@ -17,7 +17,7 @@ A Kotlin Discord bot project using Lavaplayer for audio playback and Spotify int
 
 ## Requirements
 
-- Java 21 or higher
+- Java 25 or higher
 - Gradle
 - Discord bot token
 - Spotify API credentials (Client ID & Secret)
