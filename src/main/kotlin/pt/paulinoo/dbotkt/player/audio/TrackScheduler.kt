@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.entities.Guild
@@ -102,5 +103,12 @@ class TrackScheduler(
 
     override fun onPlayerResume(player: AudioPlayer?) {
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, audioManager)
+    }
+
+    /** Cancels any pending inactivity job and releases this scheduler's coroutine scope. */
+    fun shutdown() {
+        disconnectJob?.cancel()
+        disconnectJob = null
+        scope.cancel()
     }
 }

@@ -1,0 +1,9 @@
+# Keep the build context small. Note: gradle/wrapper/gradle-wrapper.jar is NOT excluded
+# (it lives under gradle/ and is needed to run the wrapper).
+.git
+.github
+.gradle
+build
+.idea
+*.iml
+DBotKt.jar

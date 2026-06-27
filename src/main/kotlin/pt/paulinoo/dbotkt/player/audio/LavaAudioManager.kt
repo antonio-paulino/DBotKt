@@ -1,10 +1,8 @@
 package pt.paulinoo.dbotkt.player.audio
 
-import com.github.topi314.lavalyrics.LyricsManager
-import com.github.topi314.lavalyrics.lyrics.AudioLyrics
-import com.github.topi314.lavasearch.SearchManager
 import com.github.topi314.lavasrc.mirror.DefaultMirroringAudioTrackResolver
 import com.github.topi314.lavasrc.spotify.SpotifySourceManager
+import com.github.topi314.lavasrc.ytdlp.YtdlpAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats
 import com.sedmelluq.discord.lavaplayer.player.AudioConfiguration
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
@@ -29,21 +27,24 @@ import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.embed.PlayerMessageManager
 import pt.paulinoo.dbotkt.player.lyrics.LrcLibLyricsManager
+import pt.paulinoo.dbotkt.player.lyrics.LrcLibResult
+import pt.paulinoo.dbotkt.player.lyrics.LyricsSearchResult
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 class LavaAudioManager : AudioManager {
     private val logger = LoggerFactory.getLogger(LavaAudioManager::class.java)
 
-    private val players = mutableMapOf<Long, GuildAudioPlayer>()
+    private val players = ConcurrentHashMap<Long, GuildAudioPlayer>()
 
     val playerManager = DefaultAudioPlayerManager()
 
-    val searchManager = SearchManager()
-
-    val lyricsManager = LyricsManager()
+    private val lrcLib = LrcLibLyricsManager()
 
     init {
         val mirroringResolver = DefaultMirroringAudioTrackResolver(null)
+
+        val spotifyMarket = System.getenv("SPOTIFY_MARKET")?.takeIf { it.isNotBlank() } ?: "US"
 
         val spotifySourceManager =
             SpotifySourceManager(
@@ -51,21 +52,21 @@ class LavaAudioManager : AudioManager {
                     ?: throw IllegalArgumentException("Missing SPOTIFY_CLIENT_ID"),
                 System.getenv("SPOTIFY_CLIENT_SECRET")
                     ?: throw IllegalArgumentException("Missing SPOTIFY_CLIENT_SECRET"),
-                "US",
+                spotifyMarket,
                 playerManager,
                 mirroringResolver,
             )
         playerManager.registerSourceManager(spotifySourceManager)
 
-        val ytOptions =
-            YoutubeSourceOptions()
-                .setRemoteCipher(
-                    System.getenv("YT_CIPHER")
-                        ?: throw IllegalArgumentException("Missing YT_CIPHER_PATH"),
-                    System.getenv("YT_CIPHER_PASSWORD")
-                        ?: throw IllegalArgumentException("Missing YT_CIPHER_PASSWORD"),
-                    null,
-                )
+        val ytOptions = YoutubeSourceOptions()
+        val ytCipher = System.getenv("YT_CIPHER")
+        val ytCipherPassword = System.getenv("YT_CIPHER_PASSWORD")
+        if (!ytCipher.isNullOrBlank() && !ytCipherPassword.isNullOrBlank()) {
+            ytOptions.setRemoteCipher(ytCipher, ytCipherPassword, null)
+            logger.info("YouTube remote cipher enabled.")
+        } else {
+            logger.info("YouTube remote cipher not configured; using built-in signature handling.")
+        }
         val youtubeSourceManager =
             YoutubeAudioSourceManager(
                 ytOptions,
@@ -83,31 +84,30 @@ class LavaAudioManager : AudioManager {
                     },
                 ),
             )
-        youtubeSourceManager.useOauth2(System.getenv("YT_REFRESH_TOKEN"), true)
+        val ytRefreshToken = System.getenv("YT_REFRESH_TOKEN")
+        if (!ytRefreshToken.isNullOrBlank()) {
+            youtubeSourceManager.useOauth2(ytRefreshToken, true)
+            logger.info("YouTube OAuth2 enabled via refresh token.")
+        }
+
+        // Optional yt-dlp backend. When YTDLP_PATH is set it is registered *before* the
+        // native youtube-source, so it handles YouTube URLs and "ytsearch:" queries first
+        // (it shares the same prefix), with the native source kept as a fallback.
+        val ytdlpPath = System.getenv("YTDLP_PATH")
+        if (!ytdlpPath.isNullOrBlank()) {
+            playerManager.registerSourceManager(YtdlpAudioSourceManager(ytdlpPath))
+            logger.info("yt-dlp source enabled (binary: {}); native youtube-source kept as fallback.", ytdlpPath)
+        }
+
         playerManager.registerSourceManager(youtubeSourceManager)
 
-        /*
-        val ytdlManager =
-            YtdlpAudioSourceManager(
-                System.getenv("YTDLP_PATH")
-                    ?: throw IllegalArgumentException("Missing YTDLP_PATH"),
-            )
-        playerManager.registerSourceManager(ytdlManager)
-
-         */
-
         AudioSourceManagers.registerLocalSource(playerManager)
-
-        val lyr = LrcLibLyricsManager()
-
-        lyricsManager.registerLyricsManager(lyr)
 
         playerManager.configuration.apply {
             resamplingQuality = AudioConfiguration.ResamplingQuality.HIGH
             opusEncodingQuality = 10
             outputFormat = StandardAudioDataFormats.DISCORD_OPUS
         }
-        searchManager.registerSearchManager(spotifySourceManager)
     }
 
     private fun getOrCreatePlayer(
@@ -116,7 +116,9 @@ class LavaAudioManager : AudioManager {
     ): GuildAudioPlayer =
         players.computeIfAbsent(guild.idLong) {
             val player = GuildAudioPlayer(playerManager.createPlayer())
-            player.player.addListener(TrackScheduler(player.queue, guild, channel, this))
+            val scheduler = TrackScheduler(player.queue, guild, channel, this)
+            player.scheduler = scheduler
+            player.player.addListener(scheduler)
             guild.audioManager.sendingHandler = LavaPlayerAudioSendHandler(player.player)
             player
         }
@@ -261,19 +263,6 @@ class LavaAudioManager : AudioManager {
         loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = false)
     }
 
-    override fun loadAndPlaySpotifyPlaylist(
-        channel: MessageChannel,
-        guild: Guild,
-        songsMetadata: List<String>,
-        requesterId: Long,
-    ) {
-        songsMetadata.forEach { song ->
-            val trackUrl = "ytsearch:$song"
-            loadAndPlay(channel, guild, trackUrl, requesterId, queueAll = false)
-            PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
-        }
-    }
-
     override fun pause(
         channel: MessageChannel,
         guild: Guild,
@@ -316,6 +305,8 @@ class LavaAudioManager : AudioManager {
     ) {
         val player = getOrCreatePlayer(guild, channel)
         player.player.stopTrack()
+        player.scheduler?.shutdown()
+        player.player.destroy()
         PlayerMessageManager.removePlayerMessage(guild)
         player.queue.clear()
         players.remove(guild.idLong)
@@ -377,14 +368,14 @@ class LavaAudioManager : AudioManager {
     ) {
         val queue = players[guild.idLong]?.queue ?: return
 
-        if (first !in 1 until queue.size || second !in 1 until queue.size) {
+        if (first !in 1..queue.size || second !in 1..queue.size) {
             logger.warn("Invalid track indices: $first, $second in guild ${guild.name}")
             return
         }
 
         val tmp = queue[first - 1]
         queue[first - 1] = queue[second - 1]
-        queue[second] = tmp
+        queue[second - 1] = tmp
 
         logger.info("Swapped tracks at indices $first and $second in guild ${guild.name}")
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
@@ -477,6 +468,28 @@ class LavaAudioManager : AudioManager {
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
+    override fun setEqualizer(
+        channel: MessageChannel,
+        guild: Guild,
+        preset: EqualizerPreset,
+    ) {
+        val player = getOrCreatePlayer(guild, channel)
+        player.equalizerPreset = preset
+
+        if (preset == EqualizerPreset.FLAT) {
+            // Bypass the filter chain entirely so flat playback adds zero CPU cost.
+            player.player.setFilterFactory(null)
+        } else {
+            preset.gains.forEachIndexed { band, gain ->
+                player.equalizerFactory.setGain(band, gain)
+            }
+            player.player.setFilterFactory(player.equalizerFactory)
+        }
+
+        logger.info("Set equalizer to ${preset.displayName} in guild ${guild.name}")
+        PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
+    }
+
     override fun getGuildPlayer(guild: Guild): GuildAudioPlayer? = players[guild.idLong]
 
     override fun clearQueue(
@@ -489,21 +502,12 @@ class LavaAudioManager : AudioManager {
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
 
-    override fun getLyrics(
-        channel: MessageChannel,
-        guild: Guild,
-    ): AudioLyrics? {
-        val player = getOrCreatePlayer(guild, channel)
-        val currentTrack = player.player.playingTrack ?: return null
-
-        if (currentTrack.sourceManager is SpotifySourceManager) {
-            return null
-        }
-
-        val lyrics = lyricsManager.loadLyrics(currentTrack)
-
-        return lyrics
+    override fun searchLyrics(guild: Guild): LyricsSearchResult {
+        val track = players[guild.idLong]?.player?.playingTrack ?: return LyricsSearchResult(emptyList(), null)
+        return lrcLib.searchForTrack(track)
     }
+
+    override fun getLyricsResult(id: Long): LrcLibResult? = lrcLib.getById(id)
 
     override fun getLavaPlayerStats(): String {
         val totalPlayers = players.size

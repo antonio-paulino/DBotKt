@@ -1,18 +1,12 @@
 package pt.paulinoo.dbotkt.player.audio
 
-import com.github.topi314.lavalyrics.lyrics.AudioLyrics
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
+import pt.paulinoo.dbotkt.player.lyrics.LrcLibResult
+import pt.paulinoo.dbotkt.player.lyrics.LyricsSearchResult
 
 interface AudioManager {
     fun getLavaPlayerStats(): String
-
-    fun loadAndPlaySpotifyPlaylist(
-        channel: MessageChannel,
-        guild: Guild,
-        songsMetadata: List<String>,
-        requesterId: Long,
-    )
 
     fun loadAndPlayPlaylist(
         channel: MessageChannel,
@@ -93,6 +87,12 @@ interface AudioManager {
         guild: Guild,
     )
 
+    fun setEqualizer(
+        channel: MessageChannel,
+        guild: Guild,
+        preset: EqualizerPreset,
+    )
+
     fun getGuildPlayer(guild: Guild): GuildAudioPlayer?
 
     fun clearQueue(
@@ -100,10 +100,11 @@ interface AudioManager {
         guild: Guild,
     )
 
-    fun getLyrics(
-        channel: MessageChannel,
-        guild: Guild,
-    ): AudioLyrics?
+    /** Searches LRCLIB for the currently playing track and returns the candidates to choose from. */
+    fun searchLyrics(guild: Guild): LyricsSearchResult
+
+    /** Fetches a specific lyrics candidate by its LRCLIB id. */
+    fun getLyricsResult(id: Long): LrcLibResult?
 
     fun isPaused(guild: Guild): Boolean
 }

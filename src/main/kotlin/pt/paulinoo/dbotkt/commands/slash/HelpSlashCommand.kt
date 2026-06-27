@@ -34,6 +34,7 @@ class HelpSlashCommand : SlashCommand {
             - `!swap <index1> <index2>`: Swaps two songs in the queue.
             - `!remove <index>`: Removes a song from the queue by its index.
             - `!lyrics`: Displays the lyrics of the currently playing song.
+            - `!eq <preset>`: Applies an equalizer preset (e.g. bass_boost, rock, jazz).
             """.trimIndent()
 
         val embed =

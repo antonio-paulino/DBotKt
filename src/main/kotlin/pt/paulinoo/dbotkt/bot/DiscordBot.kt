@@ -18,6 +18,8 @@ import net.dv8tion.jda.api.requests.GatewayIntent
 import pt.paulinoo.dbotkt.di.ServiceLocator
 import pt.paulinoo.dbotkt.di.ServiceLocator.audioManager
 import pt.paulinoo.dbotkt.player.listeners.ButtonListener
+import pt.paulinoo.dbotkt.player.listeners.EqualizerSelectListener
+import pt.paulinoo.dbotkt.player.listeners.LyricsSelectListener
 import pt.paulinoo.dbotkt.player.listeners.QueueButtonListener
 import pt.paulinoo.dbotkt.player.listeners.VoiceChannelEmptyListener
 import java.time.Duration
@@ -62,6 +64,8 @@ class DiscordBot() : CoroutineScope {
                 },
                 QueueButtonListener(audioManager),
                 ButtonListener(audioManager),
+                EqualizerSelectListener(audioManager),
+                LyricsSelectListener(audioManager),
                 VoiceChannelEmptyListener(audioManager),
             )
             .setAudioModuleConfig(

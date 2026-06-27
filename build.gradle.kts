@@ -15,11 +15,11 @@ repositories {
 }
 
 dependencies {
-    implementation("club.minnced:jdave-api:0.1.7")
-    implementation("club.minnced:jdave-native-linux-x86-64:0.1.7")
-    implementation("club.minnced:jdave-native-linux-aarch64:0.1.7")
-    implementation("club.minnced:jdave-native-win-x86-64:0.1.7")
-    implementation("club.minnced:jdave-native-darwin:0.1.7")
+    implementation("club.minnced:jdave-api:0.1.8")
+    implementation("club.minnced:jdave-native-linux-x86-64:0.1.8")
+    implementation("club.minnced:jdave-native-linux-aarch64:0.1.8")
+    implementation("club.minnced:jdave-native-win-x86-64:0.1.8")
+    implementation("club.minnced:jdave-native-darwin:0.1.8")
     implementation("club.minnced:udpqueue-native-linux-x86-64:0.2.12")
     implementation("club.minnced:udpqueue-native-linux-x86:0.2.12")
     implementation("club.minnced:udpqueue-native-linux-aarch64:0.2.12")
@@ -34,10 +34,9 @@ dependencies {
     implementation("com.github.topi314.lavalyrics:lavalyrics:1.1.0")
     implementation("dev.arbjerg:lavaplayer:2.2.6")
     implementation("dev.lavalink.youtube:v2:1.18.0")
-    implementation("net.dv8tion:JDA:6.3.1")
+    implementation("net.dv8tion:JDA:6.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("org.slf4j:slf4j-simple:2.0.17")
-    implementation("se.michaelthelin.spotify:spotify-web-api-java:9.4.0")
     testImplementation(kotlin("test"))
 }
 

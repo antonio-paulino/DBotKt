@@ -1,13 +1,14 @@
 package pt.paulinoo.dbotkt.commands.player
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.components.actionrow.ActionRow
-import net.dv8tion.jda.api.components.buttons.Button
-import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import pt.paulinoo.dbotkt.commands.Command
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
+import pt.paulinoo.dbotkt.player.lyrics.LyricsView
 import java.util.concurrent.TimeUnit
 
 class LyricsCommand(
@@ -21,49 +22,31 @@ class LyricsCommand(
     ) {
         val guild = event.guild
 
-        val audioPlayer = audioCommandManager.getGuildPlayer(guild)
-        if (audioPlayer == null) {
-            val embed =
-                Embed.create(
-                    EmbedLevel.ERROR,
-                    "Not connected to a voice channel.",
-                ).build()
-            event.channel.sendMessageEmbeds(embed).queue { message ->
-                message.delete().queueAfter(10, TimeUnit.SECONDS)
-            }
+        if (audioCommandManager.getGuildPlayer(guild)?.player?.playingTrack == null) {
+            sendTransient(event, Embed.create(EmbedLevel.ERROR, "Nothing is playing right now.").build())
             return
         }
 
-        val lyrics = audioCommandManager.getLyrics(channel = event.channel, guild = guild)
+        val search = withContext(Dispatchers.IO) { audioCommandManager.searchLyrics(guild) }
 
-        if (lyrics == null) {
-            val embed =
-                Embed.create(
-                    EmbedLevel.ERROR,
-                    "No lyrics found for the current track.",
-                ).build()
-            event.channel.sendMessageEmbeds(embed).queue { message ->
-                message.delete().queueAfter(10, TimeUnit.SECONDS)
-            }
+        if (search.results.isEmpty()) {
+            sendTransient(event, Embed.create(EmbedLevel.ERROR, "No lyrics found for the current track.").build())
             return
         }
-        val embed =
-            Embed.create(
-                EmbedLevel.INFO,
-                "Lyrics for current track:",
-                lyrics.text,
-            ).build()
 
-        val deleteEmoji = Emoji.fromUnicode("U+274C")
+        val best = search.best ?: search.results.first()
 
-        event.channel.sendMessageEmbeds(embed)
-            .setComponents(
-                ActionRow.of(
-                    Button.secondary(
-                        "button_delete",
-                        deleteEmoji,
-                    ),
-                ),
-            ).queue()
+        event.channel.sendMessageEmbeds(LyricsView.lyricsEmbed(best))
+            .setComponents(ActionRow.of(LyricsView.buildMenu(search.results, best.id)))
+            .queue()
+    }
+
+    private fun sendTransient(
+        event: MessageReceivedEvent,
+        embed: net.dv8tion.jda.api.entities.MessageEmbed,
+    ) {
+        event.channel.sendMessageEmbeds(embed).queue { message ->
+            message.delete().queueAfter(10, TimeUnit.SECONDS)
+        }
     }
 }

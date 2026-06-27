@@ -3,6 +3,7 @@ package pt.paulinoo.dbotkt.di
 import pt.paulinoo.dbotkt.commands.CommandHandler
 import pt.paulinoo.dbotkt.commands.ServersCommand
 import pt.paulinoo.dbotkt.commands.player.ClearQueueCommand
+import pt.paulinoo.dbotkt.commands.player.EqualizerCommand
 import pt.paulinoo.dbotkt.commands.player.LyricsCommand
 import pt.paulinoo.dbotkt.commands.player.PauseCommand
 import pt.paulinoo.dbotkt.commands.player.PlayCommand
@@ -21,7 +22,6 @@ import pt.paulinoo.dbotkt.commands.slash.HelpSlashCommand
 import pt.paulinoo.dbotkt.commands.slash.SlashCommandHandler
 import pt.paulinoo.dbotkt.player.audio.AudioManager
 import pt.paulinoo.dbotkt.player.audio.LavaAudioManager
-import pt.paulinoo.dbotkt.player.audio.SpotifyHandler
 import pt.paulinoo.dbotkt.player.buttons.ButtonHandler
 import pt.paulinoo.dbotkt.player.buttons.ClearQueueButton
 import pt.paulinoo.dbotkt.player.buttons.LoopButton
@@ -54,6 +54,7 @@ object ServiceLocator {
                 QueueCommand(audioManager),
                 ClearQueueCommand(audioManager),
                 LyricsCommand(audioManager),
+                EqualizerCommand(audioManager),
                 ServersCommand(),
             ),
         )
@@ -79,16 +80,6 @@ object ServiceLocator {
                 ShuffleButton(audioManager),
                 LyricsButton(audioManager),
             ),
-        )
-    }
-    val spotifyHandler by lazy {
-        SpotifyHandler(
-            clientId =
-                System.getenv("SPOTIFY_CLIENT_ID")
-                    ?: throw IllegalArgumentException("Missing SPOTIFY_CLIENT_ID"),
-            clientSecret =
-                System.getenv("SPOTIFY_CLIENT_SECRET")
-                    ?: throw IllegalArgumentException("Missing SPOTIFY_CLIENT_SECRET"),
         )
     }
 }

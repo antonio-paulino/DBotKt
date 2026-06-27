@@ -1,120 +1,177 @@
 # DBotKT
 
-A Kotlin Discord bot project using Lavaplayer for audio playback and Spotify integration.
-
-## TODO
-- [ ] Make the bot more configurable via environment variables.
-- [ ] Improve error handling and logging.
-- [ ] Add spotify lyrics support.
+A high-quality, low-footprint Discord music bot written in Kotlin, built on JDA and
+Lavaplayer. It is designed to run across many guilds at once while keeping audio quality
+at the maximum Discord allows (48 kHz Opus, high-quality resampling).
 
 ## Features
 
-- Discord bot built with JDA
-- Audio playback using Lavaplayer
-- Spotify playlist and track metadata support via Lavasrc
-- Player statistics reporting
-- Graceful shutdown support
+- Discord bot built with **JDA** (with native voice sending via **udpqueue**/**jdave**, incl. DAVE E2E voice)
+- Audio playback using **Lavaplayer**, robust YouTube support via **youtube-source**
+- **Spotify** playlist/track support via **LavaSrc** (mirrored for playback)
+- **Optional `yt-dlp` backend** — when enabled it becomes the primary YouTube source, with the native source as fallback
+- **Interactive player message** with buttons (pause, skip, stop, queue, volume, shuffle, loop, clear, lyrics)
+- **Equalizer** with presets (Flat, Bass Boost, Treble Boost, Pop, Rock, Jazz, Classical, Loudness) via a select menu or `!eq`, using Lavaplayer's native 15-band PCM equalizer (Flat = zero added CPU)
+- **Lyrics** via [LRCLIB](https://lrclib.net) with a **pick-from-results** menu — choose the exact version (synced or plain)
+- Loop modes (single / queue), shuffle, reverse, swap, remove, skip-to, paginated queue
+- Auto-leave when the voice channel is empty (configurable grace period) or the queue stays idle
+- Player statistics and graceful shutdown
 
 ## Requirements
 
 - Java 25 or higher
-- Gradle
-- Discord bot token
+- Gradle (wrapper included)
+- A Discord bot token
 - Spotify API credentials (Client ID & Secret)
-- yt-dlp
+- *(optional)* `yt-dlp` binary — only if you want to use the yt-dlp backend
+- *(optional)* a [yt-cipher](https://github.com/kikkia/yt-cipher/) instance — only if you want remote signature solving
+
+## Configuration
+
+Environment variables:
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `DISCORD_TOKEN` | ✅ | — | Discord bot token |
+| `SPOTIFY_CLIENT_ID` | ✅ | — | Spotify client ID |
+| `SPOTIFY_CLIENT_SECRET` | ✅ | — | Spotify client secret |
+| `PREFIXES` | ✅ | — | Command prefixes, space-separated (e.g. `! .`) |
+| `ADMIN_IDS` | ✅ | — | Comma-separated Discord user IDs allowed to use admin commands (`stats`, `servers`) |
+| `SPOTIFY_MARKET` | ➖ | `US` | ISO country code used for Spotify lookups |
+| `EMPTY_CHANNEL_TIMEOUT_SECONDS` | ➖ | `60` | Grace period before leaving an empty voice channel |
+| `YTDLP_PATH` | ➖ | — | Path to the `yt-dlp` binary. If set, yt-dlp becomes the primary YouTube backend |
+| `YT_REFRESH_TOKEN` | ➖ | — | YouTube OAuth2 refresh token (enables OAuth on the native source) |
+| `YT_CIPHER` | ➖ | — | URL of a yt-cipher instance for remote signature solving |
+| `YT_CIPHER_PASSWORD` | ➖ | — | Password/token for the yt-cipher instance |
+
+Required variables must be present or the bot will not start.
+
+> **Note:** The bot will not work properly if you do not provide a Spotify client ID and
+> secret, as they are required for Spotify track/playlist lookups. The use of yt-cipher
+> (`YT_CIPHER`) is optional but recommended for better YouTube support.
+
+## Commands
+
+Default prefix `!` (configurable via `PREFIXES`):
+
+| Command | Description |
+| --- | --- |
+| `!play <query \| YouTube/Spotify URL>` | Play a track or playlist (searches YouTube for plain text) |
+| `!pause` / `!resume` | Pause / resume playback |
+| `!skip` | Skip the current track |
+| `!skipto <n>` | Skip to track number `n` in the queue |
+| `!stop` | Stop, clear the queue and leave the channel |
+| `!queue` | Show the paginated queue |
+| `!clearqueue` | Clear the queue |
+| `!volume <0-200>` | Set the playback volume |
+| `!shuffle` / `!reverse` | Shuffle / reverse the queue |
+| `!swap <a> <b>` | Swap two queued tracks |
+| `!remove <n>` | Remove track `n` from the queue |
+| `!eq <preset>` | Apply an equalizer preset (e.g. `bass_boost`, `rock`, `flat`) |
+| `!lyrics` | Show lyrics for the current track, with a menu to pick the version |
+| `!stats` / `!servers` | Admin-only diagnostics (require `ADMIN_IDS`) |
+| `/help` | Slash command listing the available commands |
+
+The persistent player message also exposes buttons and an equalizer/lyrics selector.
 
 ## Setup
 
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/antonio-paulino/DBotKt.git
-   ```
-   ```bash
    cd DBotKt
    ```
 
-2. **Configure environment variables:**
-    - `DISCORD_TOKEN`: Your Discord bot token
-    - `SPOTIFY_CLIENT_ID`: Your Spotify client ID
-    - `SPOTIFY_CLIENT_SECRET`: Your Spotify client secret
-    - `PREFIXES`: Command prefixes for the bot separated by a space (e.g., `! ?`)
-    - `ADMIN_IDS`: Comma-separated list of Discord user IDs with admin privileges
-    - `YTDLP_PATH`: Path to yt-dlp executable for improved YouTube support
-    - `YT_REFRESH_TOKEN`: Refresh token for YouTube Data API
-    - `YT_CIPHER`: Check `https://github.com/kikkia/yt-cipher/` — used for decrypting YouTube signatures.
+2. **Configure environment variables** (see [Configuration](#configuration)).
 
 3. **Build the project:**
    ```bash
    ./gradlew build
    ```
+   This produces a fat jar `DBotKt.jar` in the project root.
 
 4. **Run the bot:**
    ```bash
-   java -jar ./DBotKt-<version>.jar
+   java --enable-native-access=ALL-UNNAMED -jar ./DBotKt.jar
    ```
 
 ## Docker
 
-You can also run the bot using Docker.  
-Make sure you have Docker installed.
+### Using the prebuilt image
 
-### Using Prebuilt Image
+Update [docker-compose.yml](docker-compose.yml) with your environment variables, then:
 
-1. **Run with Docker Compose:**  
-   Update the [docker-compose.yml](docker-compose.yml) file to use the prebuilt image and set your environment variables.
-   Then start the container:
+```bash
+docker compose up -d
+```
 
-   ```bash
-    docker compose up -d
-   ```
+The provided compose file also starts a [yt-cipher](https://github.com/kikkia/yt-cipher/)
+(`ejs-api`) service. The bundled [Dockerfile](Dockerfile) already installs `yt-dlp`,
+`python3` and `ffmpeg`, so setting `YTDLP_PATH=/usr/local/bin/yt-dlp` enables the yt-dlp
+backend out of the box.
 
-2. **Or run with Docker CLI:**
-   ```bash
-   docker run -d \
-     --name DBotKT \
-     --restart always \
-     -e DISCORD_TOKEN=${DISCORD_TOKEN} \
-     -e SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID} \
-     -e SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET} \
-     -e YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN} \
-     -e PREFIXES="! ." \
-     -e ADMIN_IDS=${ADMIN_IDS} \
-     -e YTDLP_PATH=${YTDLP_PATH} \
-     -e YT_CIPHER=${YT_CIPHER} \
-     -e YT_CIPHER_PASSWORD=${YT_CIPHER_PASSWORD} \
-     paulinoo/dbotkt:latest
-   ```
-   If you want to build the image yourself, you can use the provided [Dockerfile](Dockerfile):
-   ```bash
-    docker build -t dbotkt .
-   ```
-   Make sure to set the environment variables as needed.
-    
-## Usage
+### Or run with the Docker CLI
 
-- Use Discord commands to play tracks or playlists from supported sources.
-- Use the stats command to get Lavaplayer statistics.
+```bash
+docker run -d \
+  --name DBotKT \
+  --restart always \
+  -e DISCORD_TOKEN=${DISCORD_TOKEN} \
+  -e SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID} \
+  -e SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET} \
+  -e SPOTIFY_MARKET=US \
+  -e PREFIXES="! ." \
+  -e ADMIN_IDS=${ADMIN_IDS} \
+  -e EMPTY_CHANNEL_TIMEOUT_SECONDS=60 \
+  -e YTDLP_PATH=/usr/local/bin/yt-dlp \
+  -e YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN} \
+  -e YT_CIPHER=${YT_CIPHER} \
+  -e YT_CIPHER_PASSWORD=${YT_CIPHER_PASSWORD} \
+  paulinoo/dbotkt:latest
+```
+
+### Local testing with only the yt-cipher service
+
+To run the bot locally (e.g. from your IDE) against just the signature service:
+
+```bash
+docker compose -f docker-compose.cipher.yml up
+```
+
+It exposes the service on `http://localhost:8001`; point the bot at it with
+`YT_CIPHER=http://localhost:8001` and `YT_CIPHER_PASSWORD=test`.
+
+## Testing
+
+```bash
+./gradlew test
+```
+
+The suite mixes deterministic unit tests with real integration tests against the live
+LRCLIB API. The integration tests retry and **skip** (rather than fail) when the network
+is unavailable, so the build stays green offline.
 
 ## Development
 
-- Main code is in `src/main/kotlin/`
-- Gradle is used for dependency management.
-- Update dependencies as needed in `build.gradle.kts`.
+- Main code is in `src/main/kotlin/`, tests in `src/test/kotlin/`.
+- Gradle manages dependencies; update them in [build.gradle.kts](build.gradle.kts).
+- Code style is enforced with ktlint: `./gradlew ktlintCheck` (auto-fix with `ktlintFormat`).
 
 ## Troubleshooting
 
-- If Spotify playback fails, ensure your credentials are correct and the handler is up to date.
-- For Lavaplayer errors, check for library updates or compatibility issues.
-
-## Contributing
-Contributions are welcome! Please fork the repository and submit a pull request with your changes.
+- **Bot won't start:** verify the required environment variables are set.
+- **No YouTube playback:** try enabling `YT_CIPHER` (remote signatures) or `YTDLP_PATH` (yt-dlp backend).
+- **No lyrics found:** LRCLIB matches by title + artist; obscure or mistitled tracks may have no entry. Use the version menu to pick an alternative.
 
 ## Credits
+
 - [JDA](https://github.com/discord-jda/JDA)
 - [Lavaplayer](https://github.com/lavalink-devs/lavaplayer)
-- [Lavasrc](https://github.com/topi314/LavaSrc)
-- [Youtube-source](https://github.com/lavalink-devs/youtube-source)
+- [LavaSrc](https://github.com/topi314/LavaSrc)
+- [LavaLyrics](https://github.com/topi314/LavaSrc) / [LRCLIB](https://lrclib.net)
+- [youtube-source](https://github.com/lavalink-devs/youtube-source)
 - [udpqueue](https://github.com/MinnDevelopment/udpqueue.rs)
+- [jdave](https://github.com/MinnDevelopment/jdave)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - [yt-cipher](https://github.com/kikkia/yt-cipher/)
 

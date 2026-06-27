@@ -10,11 +10,17 @@ class CommandHandler(private val commands: List<Command>) {
 
     private val logger = LoggerFactory.getLogger(CommandHandler::class.java)
 
+    private val prefixes: List<String> =
+        System.getenv("PREFIXES")
+            ?.split(" ")
+            ?.filter { it.isNotBlank() }
+            ?: emptyList()
+
     suspend fun handle(event: MessageReceivedEvent) {
         val content = event.message.contentRaw
-        if (System.getenv("PREFIXES").split(" ").none { content.startsWith(it) }) return
+        val prefix = prefixes.firstOrNull { content.startsWith(it) } ?: return
 
-        val parts = content.substring(1).split("\\s+".toRegex())
+        val parts = content.substring(prefix.length).trim().split("\\s+".toRegex())
         if (parts.isEmpty() || parts[0].isBlank()) return
 
         val name = parts[0]

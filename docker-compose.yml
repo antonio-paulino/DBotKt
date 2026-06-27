@@ -6,13 +6,15 @@ services:
     environment:
       - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
       - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      - SPOTIFY_MARKET=${SPOTIFY_MARKET:-US} # Optional ISO country code for Spotify (default: US)
       - DISCORD_TOKEN=${DISCORD_TOKEN}
-      - YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN}
+      - YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN} # Optional: YouTube OAuth2 refresh token
       - PREFIXES=! . # Space-separated list of command prefixes
       - ADMIN_IDS=${ADMIN_IDS} # Comma-separated list of admin IDs
-      - YTDLP_PATH=${YTDLP_PATH} # Path to yt-dlp binary
-      - YT_CIPHER=http://ejs-api:8001 # URL of the ejs-api service
-      - YT_CIPHER_PASSWORD=${YT_CIPHER_PASSWORD} # Password for accessing the ejs-api service
+      - EMPTY_CHANNEL_TIMEOUT_SECONDS=${EMPTY_CHANNEL_TIMEOUT_SECONDS:-60} # Grace before leaving an empty voice channel
+      - YTDLP_PATH=${YTDLP_PATH:-} # Optional: path to yt-dlp binary; if set, yt-dlp becomes the primary YouTube backend (image ships /usr/local/bin/yt-dlp)
+      - YT_CIPHER=http://ejs-api:8001 # Optional: URL of the yt-cipher (ejs-api) service
+      - YT_CIPHER_PASSWORD=${YT_CIPHER_PASSWORD} # Optional: password for the yt-cipher service
     networks:
       - internal_network
 

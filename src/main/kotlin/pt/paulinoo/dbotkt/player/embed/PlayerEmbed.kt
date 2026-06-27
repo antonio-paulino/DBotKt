@@ -3,6 +3,7 @@ package pt.paulinoo.dbotkt.player.embed
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.components.buttons.Button
+import net.dv8tion.jda.api.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
@@ -10,6 +11,7 @@ import net.dv8tion.jda.api.entities.emoji.Emoji
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
+import pt.paulinoo.dbotkt.player.audio.EqualizerPreset
 import pt.paulinoo.dbotkt.player.audio.TrackMetadata
 import java.awt.Color
 
@@ -32,20 +34,13 @@ object PlayerEmbed {
 
         val trackInfo = track.info
         val metadata = track.userData as? TrackMetadata
-        val isSpotify = trackInfo.uri.contains("spotify")
 
         val embedBuilder =
             EmbedBuilder()
                 .setColor(Color.RED)
                 .setTitle(if (audioManager.isPaused(guild)) "Paused" else "Now Playing")
                 .setDescription("[${trackInfo.title} - ${track.info.author}](${trackInfo.uri})")
-                .setThumbnail(
-                    if (isSpotify) {
-                        "https://i.scdn.co/image/${trackInfo.artworkUrl.replace("https://i.scdn.co/image/", "")}"
-                    } else {
-                        "https://img.youtube.com/vi/${extractYouTubeId(trackInfo.uri)}/hqdefault.jpg"
-                    },
-                )
+                .setThumbnail(resolveThumbnail(trackInfo.uri, trackInfo.artworkUrl))
                 .addField("Duration", formatTime(trackInfo.length), true)
                 .addField("Volume", "${player.player.volume}%", true)
 
@@ -60,8 +55,10 @@ object PlayerEmbed {
                 pt.paulinoo.dbotkt.player.audio.LoopMode.SINGLE -> "Single"
                 pt.paulinoo.dbotkt.player.audio.LoopMode.QUEUE -> "Queue"
             },
-            false,
+            true,
         )
+
+        embedBuilder.addField("Equalizer", player.equalizerPreset.displayName, true)
 
         if (player.queue.isNotEmpty()) {
             val totalQueueDuration = player.queue.sumOf { it.duration }
@@ -85,7 +82,23 @@ object PlayerEmbed {
         return embedBuilder.build()
     }
 
-    fun createPlayerButtons(): Array<ActionRow> {
+    fun createPlayerComponents(
+        guild: Guild,
+        audioManager: AudioManager,
+    ): Array<ActionRow> {
+        val currentPreset = audioManager.getGuildPlayer(guild)?.equalizerPreset ?: EqualizerPreset.FLAT
+
+        val equalizerMenu =
+            StringSelectMenu.create("equalizer_select")
+                .setPlaceholder("Equalizer: ${currentPreset.displayName}")
+                .apply {
+                    EqualizerPreset.entries.forEach { preset ->
+                        addOption(preset.displayName, preset.id, Emoji.fromUnicode(preset.emoji))
+                    }
+                    setDefaultValues(currentPreset.id)
+                }
+                .build()
+
         return arrayOf(
             ActionRow.of(
                 Button.secondary("pause_button", Emoji.fromUnicode("U+23EF")),
@@ -101,6 +114,7 @@ object PlayerEmbed {
                 Button.secondary("loop_button", Emoji.fromUnicode("U+1F501")),
                 Button.secondary("clear_queue_button", Emoji.fromUnicode("U+1F5D1")),
             ),
+            ActionRow.of(equalizerMenu),
         )
     }
 
@@ -142,14 +156,40 @@ object PlayerEmbed {
         return embed
     }
 
-    private fun extractYouTubeId(uri: String): String {
-        return uri.substringAfter("v=").substringBefore("&")
-    }
-
     private fun formatTime(ms: Long): String {
         val totalSec = ms / 1000
         val minutes = totalSec / 60
         val seconds = totalSec % 60
         return "%02d:%02d".format(minutes, seconds)
+    }
+
+    // Matches watch?v=ID, youtu.be/ID and shorts/embed/v/live/ID forms.
+    private val youtubeIdRegexes =
+        listOf(
+            Regex("""[?&]v=([\w-]{11})"""),
+            Regex("""youtu\.be/([\w-]{11})"""),
+            Regex("""youtube\.com/(?:shorts|embed|v|live)/([\w-]{11})"""),
+        )
+
+    /** Extracts the 11-character YouTube video id from any common YouTube URL form. */
+    internal fun extractYouTubeId(uri: String?): String? {
+        if (uri.isNullOrBlank()) return null
+        for (regex in youtubeIdRegexes) {
+            regex.find(uri)?.let { return it.groupValues[1] }
+        }
+        return null
+    }
+
+    /**
+     * Resolves a thumbnail for the track. YouTube tracks use `hqdefault.jpg` (always present),
+     * avoiding the `maxresdefault` URLs in [artworkUrl] that 404 for many videos; everything
+     * else (Spotify, SoundCloud, …) falls back to the source-provided [artworkUrl].
+     */
+    internal fun resolveThumbnail(
+        uri: String?,
+        artworkUrl: String?,
+    ): String? {
+        extractYouTubeId(uri)?.let { return "https://img.youtube.com/vi/$it/hqdefault.jpg" }
+        return artworkUrl?.takeIf { it.isNotBlank() }
     }
 }
