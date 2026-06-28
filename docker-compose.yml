@@ -4,6 +4,7 @@ services:
     restart: always
     image: paulinoo/dbotkt:latest
     environment:
+      - TZ=${TZ:-UTC} # Time zone for log timestamps (e.g. Europe/Lisbon)
       - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
       - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
       - SPOTIFY_MARKET=${SPOTIFY_MARKET:-US} # Optional ISO country code for Spotify (default: US)
@@ -11,10 +12,16 @@ services:
       - YT_REFRESH_TOKEN=${YT_REFRESH_TOKEN} # Optional: YouTube OAuth2 refresh token
       - PREFIXES=! . # Space-separated list of command prefixes
       - ADMIN_IDS=${ADMIN_IDS} # Comma-separated list of admin IDs
-      - EMPTY_CHANNEL_TIMEOUT_SECONDS=${EMPTY_CHANNEL_TIMEOUT_SECONDS:-60} # Grace before leaving an empty voice channel
       - YTDLP_PATH=${YTDLP_PATH:-} # Optional: path to yt-dlp binary; if set, yt-dlp becomes the primary YouTube backend (image ships /usr/local/bin/yt-dlp)
       - YT_CIPHER=http://ejs-api:8001 # Optional: URL of the yt-cipher (ejs-api) service
       - YT_CIPHER_PASSWORD=${YT_CIPHER_PASSWORD} # Optional: password for the yt-cipher service
+      - HEALTH_PORT=${HEALTH_PORT:-8080} # GET /health endpoint port ("off" to disable)
+      - COMMAND_COOLDOWN_SECONDS=${COMMAND_COOLDOWN_SECONDS:-2} # Per-user per-command cooldown
+      - GUILD_SETTINGS_FILE=/app/data/guild-settings.json # Per-guild settings store (persisted in the volume)
+    ports:
+      - "${HEALTH_PORT:-8080}:8080" # Publish the health endpoint for external monitoring
+    volumes:
+      - dbotkt-data:/app/data # Persists per-guild settings across restarts
     networks:
       - internal_network
 
@@ -26,6 +33,9 @@ services:
     restart: unless-stopped
     networks:
       - internal_network
+
+volumes:
+  dbotkt-data:
 
 networks:
   internal_network:

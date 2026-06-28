@@ -2,9 +2,8 @@ package pt.paulinoo.dbotkt.commands.player
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import pt.paulinoo.dbotkt.commands.Command
-import pt.paulinoo.dbotkt.embed.Embed
-import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.audio.AudioManager
+import pt.paulinoo.dbotkt.stats.StatsService
 import java.util.concurrent.TimeUnit
 
 class StatsCommand(
@@ -25,16 +24,11 @@ class StatsCommand(
     ) {
         if (event.author.id !in admins) return
 
-        val usageMessage = audioCommandManager.getLavaPlayerStats()
-        val embed =
-            Embed.create(
-                title = "LavaPlayer Statistics",
-                description = usageMessage,
-                level = EmbedLevel.INFO,
-            ).build()
+        val snapshot = StatsService.gather(event.jda, audioCommandManager)
+        val embed = StatsService.embed(snapshot, event.author.name)
 
         event.channel.sendMessageEmbeds(embed).queue { message ->
-            message.delete().queueAfter(20, TimeUnit.SECONDS)
+            message.delete().queueAfter(60, TimeUnit.SECONDS)
         }
     }
 }

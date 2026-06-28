@@ -14,8 +14,12 @@ at the maximum Discord allows (48 kHz Opus, high-quality resampling).
 - **Equalizer** with presets (Flat, Bass Boost, Treble Boost, Pop, Rock, Jazz, Classical, Loudness) via a select menu or `!eq`, using Lavaplayer's native 15-band PCM equalizer (Flat = zero added CPU)
 - **Lyrics** via [LRCLIB](https://lrclib.net) with a **pick-from-results** menu — choose the exact version (synced or plain)
 - Loop modes (single / queue), shuffle, reverse, swap, remove, skip-to, paginated queue
-- Auto-leave when the voice channel is empty (configurable grace period) or the queue stays idle
-- Player statistics and graceful shutdown
+- **Persisted per-server settings** (prefix, volume, equalizer) restored on restart
+- Per-user command **cooldown** to throttle spam
+- **Health endpoint** (`GET /health`) + Docker `HEALTHCHECK`, and cumulative metrics (tracks played, commands, errors)
+- Admin health panels (`!stats`, `/stats`, `/ping`)
+- Auto-leave immediately when the voice channel is empty, or after 5 minutes of idle queue
+- Graceful shutdown
 
 ## Requirements
 
@@ -38,11 +42,14 @@ Environment variables:
 | `PREFIXES` | ✅ | — | Command prefixes, space-separated (e.g. `! .`) |
 | `ADMIN_IDS` | ✅ | — | Comma-separated Discord user IDs allowed to use admin commands (`stats`, `servers`) |
 | `SPOTIFY_MARKET` | ➖ | `US` | ISO country code used for Spotify lookups |
-| `EMPTY_CHANNEL_TIMEOUT_SECONDS` | ➖ | `60` | Grace period before leaving an empty voice channel |
+| `TZ` | ➖ | system / `UTC` | Time zone for log timestamps (e.g. `Europe/Lisbon`) |
 | `YTDLP_PATH` | ➖ | — | Path to the `yt-dlp` binary. If set, yt-dlp becomes the primary YouTube backend |
 | `YT_REFRESH_TOKEN` | ➖ | — | YouTube OAuth2 refresh token (enables OAuth on the native source) |
 | `YT_CIPHER` | ➖ | — | URL of a yt-cipher instance for remote signature solving |
 | `YT_CIPHER_PASSWORD` | ➖ | — | Password/token for the yt-cipher instance |
+| `HEALTH_PORT` | ➖ | `8080` | Port for the `GET /health` endpoint; set to `off` to disable |
+| `COMMAND_COOLDOWN_SECONDS` | ➖ | `2` | Per-user, per-command cooldown to throttle spam (`0` disables) |
+| `GUILD_SETTINGS_FILE` | ➖ | `data/guild-settings.json` | Where per-guild settings are persisted |
 
 Required variables must be present or the bot will not start.
 
@@ -67,12 +74,33 @@ Default prefix `!` (configurable via `PREFIXES`):
 | `!shuffle` / `!reverse` | Shuffle / reverse the queue |
 | `!swap <a> <b>` | Swap two queued tracks |
 | `!remove <n>` | Remove track `n` from the queue |
-| `!eq <preset>` | Apply an equalizer preset (e.g. `bass_boost`, `rock`, `flat`) |
+| `!eq <preset>` | Apply an equalizer preset (e.g. `bass_boost`, `rock`, `flat`) — persisted per server |
 | `!lyrics` | Show lyrics for the current track, with a menu to pick the version |
-| `!stats` / `!servers` | Admin-only diagnostics (require `ADMIN_IDS`) |
+| `!settings` | Show this server's settings |
+| `!prefix <p\|clear>` | Set or clear a server-specific command prefix (Manage Server) |
+| `!stats` | Admin-only health & stats panel (uptime, ping, servers/members, players, totals, memory, CPU, JVM/OS) |
+| `!servers` | Admin-only list of connected servers (requires `ADMIN_IDS`) |
 | `/help` | Slash command listing the available commands |
+| `/stats`, `/ping` | Admin-only ephemeral health & latency (requires `ADMIN_IDS`) |
 
 The persistent player message also exposes buttons and an equalizer/lyrics selector.
+
+Per-server settings (prefix, volume, equalizer) are persisted to disk
+([`GUILD_SETTINGS_FILE`](#configuration)) and restored on restart.
+
+## Health & Monitoring
+
+The bot serves a tiny HTTP health endpoint (no extra dependencies) for uptime monitoring
+and container healthchecks:
+
+```bash
+curl http://localhost:8080/health
+```
+
+It returns **200** with a JSON snapshot (gateway ping, uptime, guilds/members, players,
+queue, cumulative totals, memory, CPU, threads) when the Discord gateway is connected, and
+**503** otherwise. The Docker image declares a `HEALTHCHECK` against it, so orchestrators
+can detect and restart an unhealthy bot. Set `HEALTH_PORT=off` to disable.
 
 ## Setup
 

@@ -5,8 +5,17 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import pt.paulinoo.dbotkt.player.lyrics.LrcLibResult
 import pt.paulinoo.dbotkt.player.lyrics.LyricsSearchResult
 
+/** Aggregated audio-playback metrics across all guilds. */
+data class AudioStats(
+    val totalPlayers: Int,
+    val playing: Int,
+    val paused: Int,
+    val queuedTracks: Int,
+    val queuedDurationMs: Long,
+)
+
 interface AudioManager {
-    fun getLavaPlayerStats(): String
+    fun getAudioStats(): AudioStats
 
     fun loadAndPlayPlaylist(
         channel: MessageChannel,

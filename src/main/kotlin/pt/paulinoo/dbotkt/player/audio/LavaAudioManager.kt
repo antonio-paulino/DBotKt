@@ -23,6 +23,7 @@ import dev.lavalink.youtube.clients.Web
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import org.slf4j.LoggerFactory
+import pt.paulinoo.dbotkt.config.GuildSettingsStore
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
 import pt.paulinoo.dbotkt.player.embed.PlayerMessageManager
@@ -32,7 +33,9 @@ import pt.paulinoo.dbotkt.player.lyrics.LyricsSearchResult
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
-class LavaAudioManager : AudioManager {
+class LavaAudioManager(
+    private val guildSettings: GuildSettingsStore,
+) : AudioManager {
     private val logger = LoggerFactory.getLogger(LavaAudioManager::class.java)
 
     private val players = ConcurrentHashMap<Long, GuildAudioPlayer>()
@@ -120,8 +123,25 @@ class LavaAudioManager : AudioManager {
             player.scheduler = scheduler
             player.player.addListener(scheduler)
             guild.audioManager.sendingHandler = LavaPlayerAudioSendHandler(player.player)
+            applyPersistedSettings(player, guild.idLong)
             player
         }
+
+    /** Restores the guild's saved volume and equalizer onto a freshly created player. */
+    private fun applyPersistedSettings(
+        player: GuildAudioPlayer,
+        guildId: Long,
+    ) {
+        val saved = guildSettings.get(guildId)
+        saved.volume?.let { player.player.volume = it }
+
+        val preset = EqualizerPreset.fromId(saved.equalizer) ?: EqualizerPreset.FLAT
+        player.equalizerPreset = preset
+        if (preset != EqualizerPreset.FLAT) {
+            preset.gains.forEachIndexed { band, gain -> player.equalizerFactory.setGain(band, gain) }
+            player.player.setFilterFactory(player.equalizerFactory)
+        }
+    }
 
     private fun loadAndPlay(
         channel: MessageChannel,
@@ -356,6 +376,7 @@ class LavaAudioManager : AudioManager {
     ) {
         val player = getOrCreatePlayer(guild, channel)
         player.player.volume = volume
+        guildSettings.update(guild.idLong) { it.copy(volume = volume) }
         logger.info("Set volume to $volume in guild ${guild.name}")
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
@@ -410,7 +431,7 @@ class LavaAudioManager : AudioManager {
             return
         }
 
-        player.queue = ArrayDeque(queue.shuffled())
+        player.queue = ArrayDeque(queue.shuffled().map { it.cloneTrack() })
         logger.info("Shuffled the queue in guild ${guild.name}, new size is ${player.queue.size}")
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
@@ -427,7 +448,7 @@ class LavaAudioManager : AudioManager {
             return
         }
 
-        player.queue = ArrayDeque(queue.reversed())
+        player.queue = ArrayDeque(queue.reversed().map { it.cloneTrack() })
         logger.info("Reversed the queue in guild ${guild.name}, new size is ${player.queue.size}")
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
@@ -486,6 +507,7 @@ class LavaAudioManager : AudioManager {
             player.player.setFilterFactory(player.equalizerFactory)
         }
 
+        guildSettings.update(guild.idLong) { it.copy(equalizer = preset.id) }
         logger.info("Set equalizer to ${preset.displayName} in guild ${guild.name}")
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, this)
     }
@@ -509,20 +531,25 @@ class LavaAudioManager : AudioManager {
 
     override fun getLyricsResult(id: Long): LrcLibResult? = lrcLib.getById(id)
 
-    override fun getLavaPlayerStats(): String {
-        val totalPlayers = players.size
-        val playingPlayers = players.count { !it.value.isPaused }
-        val pausedPlayers = players.count { it.value.isPaused }
-        val memory = Runtime.getRuntime()
-        val usedMemory = (memory.totalMemory() - memory.freeMemory()) / (1024 * 1024)
-        val maxMemory = memory.maxMemory() / (1024 * 1024)
+    override fun getAudioStats(): AudioStats {
+        val snapshot = players.values.toList()
+        val playing = snapshot.count { it.player.playingTrack != null && !it.isPaused }
+        val paused = snapshot.count { it.isPaused }
+        val queuedTracks = snapshot.sumOf { it.queue.size }
+        val queuedDurationMs = snapshot.sumOf { player -> player.queue.sumOf { it.duration } }
 
-        return """
-            **Lavaplayer Stats:**
-            - Total players: $totalPlayers
-            - Playing: $playingPlayers
-            - Paused: $pausedPlayers
-            - Memory usage: $usedMemory MB / $maxMemory MB
-            """.trimIndent()
+        return AudioStats(
+            totalPlayers = snapshot.size,
+            playing = playing,
+            paused = paused,
+            queuedTracks = queuedTracks,
+            queuedDurationMs = queuedDurationMs,
+        )
+    }
+
+    private fun AudioTrack.cloneTrack(): AudioTrack {
+        val clone = makeClone()
+        clone.userData = userData
+        return clone
     }
 }

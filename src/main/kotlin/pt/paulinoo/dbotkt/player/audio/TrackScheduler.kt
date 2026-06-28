@@ -15,8 +15,8 @@ import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import pt.paulinoo.dbotkt.embed.Embed
 import pt.paulinoo.dbotkt.embed.EmbedLevel
+import pt.paulinoo.dbotkt.metrics.BotMetrics
 import pt.paulinoo.dbotkt.player.embed.PlayerMessageManager
-import java.util.concurrent.TimeUnit.MINUTES
 import kotlin.time.Duration.Companion.minutes
 
 class TrackScheduler(
@@ -92,6 +92,7 @@ class TrackScheduler(
         player: AudioPlayer,
         track: AudioTrack,
     ) {
+        BotMetrics.trackPlayed()
         disconnectJob?.cancel()
         disconnectJob = null
         PlayerMessageManager.sendOrUpdatePlayerMessage(channel, guild, audioManager)

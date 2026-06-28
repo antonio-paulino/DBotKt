@@ -15,13 +15,16 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.requests.GatewayIntent
+import pt.paulinoo.dbotkt.commands.help.HelpPaginationListener
 import pt.paulinoo.dbotkt.di.ServiceLocator
 import pt.paulinoo.dbotkt.di.ServiceLocator.audioManager
+import pt.paulinoo.dbotkt.health.HealthServer
 import pt.paulinoo.dbotkt.player.listeners.ButtonListener
 import pt.paulinoo.dbotkt.player.listeners.EqualizerSelectListener
 import pt.paulinoo.dbotkt.player.listeners.LyricsSelectListener
 import pt.paulinoo.dbotkt.player.listeners.QueueButtonListener
 import pt.paulinoo.dbotkt.player.listeners.VoiceChannelEmptyListener
+import pt.paulinoo.dbotkt.stats.StatsService
 import java.time.Duration
 
 class DiscordBot() : CoroutineScope {
@@ -64,6 +67,7 @@ class DiscordBot() : CoroutineScope {
                 },
                 QueueButtonListener(audioManager),
                 ButtonListener(audioManager),
+                HelpPaginationListener(),
                 EqualizerSelectListener(audioManager),
                 LyricsSelectListener(audioManager),
                 VoiceChannelEmptyListener(audioManager),
@@ -79,6 +83,8 @@ class DiscordBot() : CoroutineScope {
             .build()
             .awaitReady()
 
+    private val healthServer: HealthServer? = startHealthServer()
+
     init {
         registerCommands()
     }
@@ -88,7 +94,19 @@ class DiscordBot() : CoroutineScope {
         jda.updateCommands().addCommands(commands.map { it.getCommandData() }).queue()
     }
 
+    private fun startHealthServer(): HealthServer? {
+        val portValue = System.getenv("HEALTH_PORT") ?: "8080"
+        if (portValue.equals("off", ignoreCase = true) || portValue.isBlank()) return null
+        val port = portValue.toIntOrNull() ?: return null
+
+        return HealthServer(port) {
+            val snapshot = StatsService.gather(jda, audioManager)
+            snapshot.healthy to StatsService.toJson(snapshot)
+        }.also { it.start() }
+    }
+
     fun shutdown() {
+        healthServer?.stop()
         jda.shutdown()
         if (!jda.awaitShutdown(Duration.ofSeconds(10))) {
             jda.shutdownNow()

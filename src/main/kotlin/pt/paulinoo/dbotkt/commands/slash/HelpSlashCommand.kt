@@ -1,61 +1,21 @@
 package pt.paulinoo.dbotkt.commands.slash
 
-import net.dv8tion.jda.api.components.actionrow.ActionRow
-import net.dv8tion.jda.api.components.buttons.Button
-import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
-import pt.paulinoo.dbotkt.embed.Embed
-import pt.paulinoo.dbotkt.embed.EmbedLevel
+import pt.paulinoo.dbotkt.commands.help.HelpPages
 
 class HelpSlashCommand : SlashCommand {
     override val name: String = "help"
 
-    override fun getCommandData(): SlashCommandData {
-        return Commands.slash(name, "Shows the help menu")
-    }
+    override fun getCommandData(): SlashCommandData = Commands.slash(name, "Shows the help menu")
 
     override suspend fun execute(event: SlashCommandInteractionEvent) {
-        val helpMessage =
-            """
-            Here are the commands you can use:
-            - `!play <song || youtube link || spotify link>`: Plays a song or playlist.
-            - `!pause`: Pauses the current song.
-            - `!resume`: Resumes the paused song.
-            - `!skip`: Skips the current song.
-            - `!skipto <number>`: Skips to the specified song in the queue.
-            - `!stop`: Stops the current song and clears the queue.
-            - `!queue`: Displays the current song queue.
-            - `!clearqueue`: Clears the current song queue.
-            - `!volume <1-200>`: Sets the volume of the music player.
-            - `!reverse`: Reverses the current song queue.
-            - `!shuffle`: Shuffles the current song queue.
-            - `!swap <index1> <index2>`: Swaps two songs in the queue.
-            - `!remove <index>`: Removes a song from the queue by its index.
-            - `!lyrics`: Displays the lyrics of the currently playing song.
-            - `!eq <preset>`: Applies an equalizer preset (e.g. bass_boost, rock, jazz).
-            """.trimIndent()
-
-        val embed =
-            Embed.create(
-                title = "Help Menu",
-                description = helpMessage,
-                level = EmbedLevel.INFO,
-            ).build()
-
-        val deleteEmoji = Emoji.fromUnicode("U+274C")
-
-        event.replyEmbeds(
-            embed,
-        )
-            .setComponents(
-                ActionRow.of(
-                    Button.secondary(
-                        "button_delete",
-                        deleteEmoji,
-                    ),
-                ),
-            ).queue()
+        val prefix = HelpPages.resolvePrefix(event.guild?.idLong)
+        val isAdmin = event.user.id in HelpPages.admins
+        val page = HelpPages.page(0, prefix, isAdmin)
+        event.replyEmbeds(page.first)
+            .setComponents(page.second)
+            .queue()
     }
 }

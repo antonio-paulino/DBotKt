@@ -32,4 +32,9 @@ RUN apt-get update && \
 
 COPY --from=build /src/DBotKt.jar .
 
+# The bot exposes GET /health on HEALTH_PORT (default 8080); it returns 503 when the
+# Discord gateway is down, so the healthcheck fails fast on an unhealthy bot.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD curl -fsS "http://localhost:${HEALTH_PORT:-8080}/health" || exit 1
+
 CMD ["java", "--enable-native-access=ALL-UNNAMED", "-jar", "DBotKt.jar"]
